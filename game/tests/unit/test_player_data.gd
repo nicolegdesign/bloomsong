@@ -22,6 +22,24 @@ func test_progression_and_diary(t: Node) -> void:
 	t.check(not PlayerData.record_sighting(&"snail"), "second sighting is not")
 	t.check_eq(int(PlayerData.diary[&"snail"].times_seen), 2, "times_seen counts visits")
 
+	# Favorite season/weather/time (ROADMAP 6.2 diary favorites). Uses a different
+	# resident than the times_seen checks above/below so it doesn't disturb them.
+	Clock.weather = Types.Weather.RAIN
+	Clock.minute = 9 * 60  # morning
+	PlayerData.record_sighting(&"robin")
+	Clock.weather = Types.Weather.RAIN
+	Clock.minute = 9 * 60
+	PlayerData.record_sighting(&"robin")
+	Clock.weather = Types.Weather.SUNNY
+	Clock.minute = 20 * 60  # evening, just once
+	PlayerData.record_sighting(&"robin")
+	t.check_eq(PlayerData.favorite_weather(&"robin"), Types.Weather.RAIN,
+			"favorite weather is whichever was seen most (2 rain vs 1 sunny)")
+	t.check_eq(PlayerData.favorite_time(&"robin"), Types.TimeOfDay.MORNING,
+			"favorite time is whichever was seen most (2 morning vs 1 evening)")
+	t.check_eq(PlayerData.favorite_season(&"butterfly"), -1,
+			"a never-seen resident has no favorite (sentinel -1)")
+
 	PlayerData.add_item(&"berry", 3)
 	var earned := PlayerData.sell_all()
 	t.check_eq(earned, 18, "3 berries sell for 6 each")

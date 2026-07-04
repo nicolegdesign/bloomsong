@@ -18,6 +18,7 @@ description = "A cheerful visitor that drifts from bloom to bloom, sipping necta
 diary_hint = "Flutters in on sunny days when plenty of flowers are in bloom."
 placeholder_color = Color(0.95, 0.55, 0.15, 1)
 requirements = [SubResource("Resource_req1")]
+behaviors = 5
 active_times = 3
 active_seasons = 15
 weather_needed = 1

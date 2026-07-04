@@ -24,6 +24,7 @@ description = "An early riser with a rust-red chest. It sings from the treetops 
 diary_hint = "An early bird that likes tall trees and a place to bathe."
 placeholder_color = Color(0.78, 0.35, 0.25, 1)
 requirements = [SubResource("Resource_req1"), SubResource("Resource_req2")]
+behaviors = 7
 active_times = 1
 active_seasons = 15
 weather_needed = 0

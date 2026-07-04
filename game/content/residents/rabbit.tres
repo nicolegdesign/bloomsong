@@ -24,6 +24,7 @@ description = "A soft, twitchy-nosed nibbler that hides among the bushes and tal
 diary_hint = "Nibbles near bushes where the grass grows tall."
 placeholder_color = Color(0.8, 0.78, 0.72, 1)
 requirements = [SubResource("Resource_req1"), SubResource("Resource_req2")]
+behaviors = 3
 active_times = 7
 active_seasons = 15
 weather_needed = 0

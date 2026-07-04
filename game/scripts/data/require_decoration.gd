@@ -10,5 +10,9 @@ func is_met(ctx: HabitatContext) -> bool:
 	return ctx.garden.count_decoration(decoration_id) >= count
 
 
+func matching_cells(ctx: HabitatContext) -> Array[Vector2i]:
+	return ctx.garden.cells_by_decoration(decoration_id)
+
+
 func describe() -> String:
 	return "a %s" % decoration_id

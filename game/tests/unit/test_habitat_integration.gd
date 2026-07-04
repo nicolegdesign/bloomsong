@@ -46,3 +46,40 @@ func test_full_discovery_flow(t: Node) -> void:
 	SaveManager._garden = null
 	garden.queue_free()
 	PlayerData.deserialize(player_snapshot)
+
+
+## ROADMAP 6.4: times_seen counts distinct visits (spawn events), not simulation
+## ticks or frames — a resident lingering across many evaluation passes shouldn't
+## rack up sightings just for existing.
+func test_sighting_counts_distinct_visits_not_ticks(t: Node) -> void:
+	var player_snapshot := PlayerData.serialize()
+	PlayerData.deserialize({})
+
+	var garden := Garden.new()
+	t.add_child(garden)
+
+	Clock.weather = Types.Weather.RAIN
+	for i in 4:
+		HabitatDirector._evaluation_pass()
+	t.check_eq(int(PlayerData.diary[&"snail"].times_seen), 1,
+			"one visit after arriving, regardless of how many passes it took")
+	for i in 5:
+		HabitatDirector._evaluation_pass()  # still raining, snail stays — same visit
+	t.check_eq(int(PlayerData.diary[&"snail"].times_seen), 1,
+			"lingering through more ticks doesn't add sightings")
+
+	Clock.weather = Types.Weather.SUNNY  # snail leaves
+	for i in 4:
+		HabitatDirector._evaluation_pass()
+	t.check(not HabitatDirector._active.has(&"snail"), "snail left when it stopped raining")
+
+	Clock.weather = Types.Weather.RAIN  # a second, distinct visit
+	for i in 4:
+		HabitatDirector._evaluation_pass()
+	t.check_eq(int(PlayerData.diary[&"snail"].times_seen), 2, "a second distinct visit counts once more")
+
+	HabitatDirector.reset()
+	HabitatDirector._garden = null
+	SaveManager._garden = null
+	garden.queue_free()
+	PlayerData.deserialize(player_snapshot)

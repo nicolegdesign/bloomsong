@@ -29,7 +29,7 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
       ✅ Test: the three `.tres` files open in the Inspector with all fields editable.
 - [x] **1.2 Build the `Garden` scene**: terrain rendering (placeholder colored-cell renderer for now; swap to `TileMapLayer` with the Phase 8 art pass) + a `garden_model.gd` holding the terrain dictionary. Initialize a small garden (e.g. 20×15 cells) of short grass surrounded by a non-editable border.
       ✅ Test: run the game — a grass rectangle appears.
-- [ ] **1.3 Cell picking + hover highlight**: convert mouse position to grid cell; draw a highlight over the hovered cell (dimmed/red outside the editable area).
+- [x] **1.3 Cell picking + hover highlight**: convert mouse position to grid cell; draw a highlight over the hovered cell (dimmed/red outside the editable area).
       ✅ Test: highlight follows the mouse and snaps to cells.
 - [x] **1.4 Terrain painting**: a temporary hotbar (keys 1–3 select terrain) and click-to-paint via `Garden.set_terrain()`. Model updates first, TileMapLayer reflects it.
       ✅ Test: paint dirt paths and long-grass patches; print the model dict and confirm it matches what's on screen.
@@ -51,7 +51,7 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
       ✅ Test: manually set a placement's stage in code — sprite swaps correctly.
 - [x] **2.5 Growth on the simulation tick**: each `day_passed`, placements advance growth toward `days_to_mature`; stage = fraction of maturity. Emit `plant_matured` on the EventBus.
       ✅ Test: plant all 3 species, skip days with the debug key — each reaches maturity after its configured day count.
-- [ ] **2.6 Planting UI v1**: replace the debug key with a simple bottom-bar palette (terrain + plants from ContentDB, tool modes: plant / paint / remove).
+- [x] **2.6 Planting UI v1**: replace the debug key with a simple bottom-bar palette (terrain + plants from ContentDB, tool modes: plant / paint / remove).
       ✅ Test: full flow with mouse only — pick a flower, plant 5 of them, remove one, paint terrain.
 
 ## Phase 3 — Save/Load
@@ -69,9 +69,9 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
 
 - [x] **4.1 Time-of-day**: `Clock` derives Morning/Afternoon/Evening/Night from the minute counter; emits `time_of_day_changed`. HUD shows a small clock + day.
       ✅ Test: watch the label cycle through all four periods across a day.
-- [ ] **4.2 Ambient tint**: a `CanvasModulate` lerps color by time of day (warm morning, bright noon, orange evening, dark blue night).
+- [x] **4.2 Ambient tint**: a `CanvasModulate` lerps color by time of day (warm morning, bright noon, orange evening, dark blue night).
       ✅ Test: visible, smooth day/night look.
-- [ ] **4.3 Weather v1**: `Clock` rolls weather (sunny/cloudy/rain) once per morning from a weighted table; emits `weather_changed`; HUD icon + a simple rain overlay (particle scene).
+- [x] **4.3 Weather v1**: `Clock` rolls weather (sunny/cloudy/rain) once per morning from a weighted table; emits `weather_changed`; HUD icon + a simple rain overlay (particle scene).
       ✅ Test: skip several days; weather varies; rain is visible.
 - [x] **4.4 Season scaffolding**: `Clock` knows the season (fixed to **Spring** for the slice, but the field, signal, and save support exist). `PlantData.bloom_seasons` respected: a mature flower shows its bloom texture only in listed seasons.
       ✅ Test: set a plant's bloom season to summer in its `.tres` — it stays unbloomed in spring.
@@ -87,7 +87,7 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
       ✅ Test: `.tres` files open cleanly; requirements arrays visible in Inspector.
 - [x] **5.3 `HabitatDirector` evaluation pass**: on the simulation tick, check each resident: requirements met AND active time/season/weather → mark eligible; schedule spawn within the next 1–3 ticks (bounded randomness). Despawn when conditions stop holding (leave animation, not a pop).
       ✅ Test: unit test for eligibility logic with a fake clock; in-game, plant 3 flowers on a sunny day → butterfly appears within a couple of minutes.
-- [ ] **5.4 `Resident` scene + behaviors**: state machine cycling wander / rest / eat (behaviors listed in its data), staying near the cells that satisfied its requirements. Simple tween/`AnimatedSprite2D` movement.
+- [x] **5.4 `Resident` scene + behaviors**: state machine cycling wander / rest / eat (behaviors listed in its data), staying near the cells that satisfied its requirements. Simple tween/`AnimatedSprite2D` movement.
       ✅ Test: robin flies to the tree area, hops around, occasionally sits.
 - [x] **5.5 `DecorationData` + placement**: decorations placeable like plants (no growth); author **Bird Bath** and **Log**; give Robin a bird-bath requirement to prove decoration requirements work end-to-end.
       ✅ Test: tree alone ≠ robin; tree + bird bath in the morning = robin.
@@ -97,13 +97,13 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
 ## Phase 6 — Diary & Discovery Feel
 *Goal: discovery is celebrated and recorded; the collection loop motivates.*
 
-- [ ] **6.1 Discovery moment**: first sighting pauses ambient flow briefly — sparkle at the resident, name banner, gentle sound placeholder, "added to diary" toast.
+- [x] **6.1 Discovery moment**: first sighting pauses ambient flow briefly — sparkle at the resident, name banner, gentle sound placeholder, "added to diary" toast.
       ✅ Test: first butterfly triggers the moment; second butterfly doesn't.
-- [ ] **6.2 Diary UI — residents**: a book screen (toggle with Tab/button): grid of entries, undiscovered = silhouette + `diary_hint`. Entry page shows illustration, description, times seen, favorite season/weather/time, and favorites (plants/terrain/decorations) revealed per PLAN.md §8 hint policy.
+- [x] **6.2 Diary UI — residents**: a book screen (toggle with Tab/button): grid of entries, undiscovered = silhouette + `diary_hint`. Entry page shows illustration, description, times seen, favorite season/weather/time, and favorites (plants/terrain/decorations) revealed per PLAN.md §8 hint policy.
       ✅ Test: 4 residents show correct discovered/undiscovered states; data matches their `.tres`.
-- [ ] **6.3 Diary — plants section**: every species grown to maturity gets a page (times grown, bloom season).
+- [x] **6.3 Diary — plants section**: every species grown to maturity gets a page (times grown, bloom season).
       ✅ Test: grow all 3 plants, all 3 pages appear.
-- [ ] **6.4 Sighting tracking**: `times_seen` increments per distinct visit (not per frame!); diary live-updates.
+- [x] **6.4 Sighting tracking**: `times_seen` increments per distinct visit (not per frame!); diary live-updates.
       ✅ Test: let the robin visit twice across two mornings → times_seen = 2.
 
 ## Phase 7 — Progression & Economy

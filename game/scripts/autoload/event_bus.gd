@@ -18,7 +18,7 @@ signal fruit_ready(cell: Vector2i, plant_id: StringName)
 # Residents (emitted by HabitatDirector / PlayerData)
 signal resident_spawned(resident_id: StringName, cell: Vector2i)
 signal resident_despawned(resident_id: StringName)
-signal resident_discovered(resident_id: StringName)
+signal resident_discovered(resident_id: StringName, cell: Vector2i)
 
 # Player progression / economy (emitted by PlayerData)
 signal xp_changed(xp: int, level: int)
@@ -30,3 +30,4 @@ signal item_collected(item_id: StringName, count: int)
 signal toast(message: String)
 signal game_loaded
 signal game_saved
+signal toggle_diary

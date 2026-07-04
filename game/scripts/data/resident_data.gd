@@ -8,8 +8,15 @@ extends Resource
 @export_multiline var description: String
 ## Shown in the diary before discovery — every resident ships with a hint (CLAUDE.md).
 @export_multiline var diary_hint: String
+
+const BEHAVIOR_WANDER := 1
+const BEHAVIOR_REST := 2
+const BEHAVIOR_EAT := 4
 @export var placeholder_color: Color = Color.WHITE
 @export var requirements: Array[Requirement] = []
+## Which wandering behaviors this resident cycles through (ROADMAP 5.4). Wander is
+## always available even if unset, so a resident is never stuck standing still.
+@export_flags("Wander:1", "Rest:2", "Eat:4") var behaviors: int = BEHAVIOR_WANDER
 @export_flags("Morning:1", "Afternoon:2", "Evening:4", "Night:8") var active_times: int = 15
 @export_flags("Spring:1", "Summer:2", "Fall:4", "Winter:8") var active_seasons: int = 15
 ## 0 = any weather.

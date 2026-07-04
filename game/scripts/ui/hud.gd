@@ -7,14 +7,14 @@ var build: BuildController
 
 var _info := Label.new()      # top-left: day/time/season/weather
 var _status := Label.new()    # top-right: money/level/xp/inventory
-var _palette := Label.new()   # bottom: build selection
-var _help := Label.new()      # bottom: controls
+var _help := Label.new()      # above the palette: controls
 var _toast := Label.new()     # center: transient messages
+var _diary_button := Button.new()  # top-right: opens the diary
 var _refresh_accumulator := 0.0
 
 
 func _ready() -> void:
-	for label: Label in [_info, _status, _palette, _help, _toast]:
+	for label: Label in [_info, _status, _help, _toast]:
 		label.add_theme_color_override("font_color", Color.WHITE)
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 		label.add_theme_constant_override("outline_size", 6)
@@ -24,18 +24,27 @@ func _ready() -> void:
 	_status.position = Vector2(-460, 8)
 	_status.size.x = 450
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_palette.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_palette.position.y -= 58
-	_palette.position.x = 10
 	_help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_help.position.y -= 30
+	_help.position.y -= PaletteUI.BAR_HEIGHT + 22
 	_help.position.x = 10
-	_help.text = "WASD move · Tab mode · 1-9 select · LMB place/harvest · RMB remove · N next day · B sell produce · F9 save · F10 load"
+	_help.text = "WASD move · click palette or 1-9 select, Tab mode · LMB place/harvest · RMB remove · J diary · N next day · B sell produce · F9 save · F10 load · F12 new game"
 	_help.add_theme_font_size_override("font_size", 13)
 	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_toast.position.y = 80
 	_toast.add_theme_font_size_override("font_size", 20)
 	_toast.modulate.a = 0.0
+
+	var palette := PaletteUI.new()
+	palette.build = build
+	add_child(palette)
+
+	_diary_button.text = "📖 Diary (J)"
+	_diary_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_diary_button.position = Vector2(-150, 46)
+	_diary_button.size = Vector2(140, 32)
+	_diary_button.pressed.connect(func() -> void: EventBus.toggle_diary.emit())
+	add_child(_diary_button)
+
 	EventBus.toast.connect(show_toast)
 	EventBus.level_up.connect(_on_level_up)
 
@@ -58,8 +67,6 @@ func _process(delta: float) -> void:
 	_status.text = "🌼 Lv %d  (%d/%d xp) · %d coins · %d items" % [
 		PlayerData.level, PlayerData.xp, PlayerData.xp_to_next(), PlayerData.money, inv_total,
 	]
-	if build != null:
-		_palette.text = build.describe()
 
 
 func show_toast(message: String) -> void:

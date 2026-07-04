@@ -47,6 +47,14 @@ func save_game() -> bool:
 	return true
 
 
+## Wipes the save file so the next launch starts fresh (used by the debug
+## "new game" hotkey — see main.gd). Does not touch in-memory state itself.
+func delete_save() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+	return DirAccess.remove_absolute(SAVE_PATH) == OK
+
+
 func load_game() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH):
 		return false

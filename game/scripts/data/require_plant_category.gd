@@ -14,6 +14,10 @@ func is_met(ctx: HabitatContext) -> bool:
 	return ctx.garden.count_plants_by_category(category, mature_only, season) >= count
 
 
+func matching_cells(ctx: HabitatContext) -> Array[Vector2i]:
+	return ctx.garden.cells_by_category(category, mature_only, ctx.season if blooming else -1)
+
+
 func describe() -> String:
 	var what := Types.CATEGORY_NAMES[category]
 	return "%d %s%s%s" % [count, "blooming " if blooming else "", what, "s" if count > 1 else ""]

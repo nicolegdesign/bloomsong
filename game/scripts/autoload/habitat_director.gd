@@ -63,14 +63,14 @@ func _evaluation_pass() -> void:
 
 
 func _spawn(data: ResidentData) -> void:
-	var cell := _pick_spawn_cell()
+	var cell := _pick_spawn_cell(data)
 	var view := ResidentView.new(data, _garden.cell_to_world(cell))
 	_garden.add_resident_view(view)
 	_active[data.id] = view
 	var is_new := PlayerData.record_sighting(data.id)
 	EventBus.resident_spawned.emit(data.id, cell)
 	if is_new:
-		EventBus.toast.emit("✨ New resident discovered: %s!" % data.display_name)
+		EventBus.resident_discovered.emit(data.id, cell)
 	else:
 		EventBus.toast.emit("%s is visiting." % data.display_name)
 
@@ -90,7 +90,16 @@ func _despawn(id: StringName) -> void:
 	EventBus.resident_despawned.emit(id)
 
 
-## TODO Phase 5.4: anchor the spawn near the cells that satisfied the requirements.
-func _pick_spawn_cell() -> Vector2i:
+## Anchors the spawn near whatever satisfied the resident's requirements (ROADMAP
+## 5.4) — a robin lands by its tree, a rabbit by its bushes — falling back to a
+## random cell for residents with no spatial requirement (e.g. the rain-loving snail).
+func _pick_spawn_cell(data: ResidentData) -> Vector2i:
 	var model: GardenModel = _garden.model
+	var ctx := HabitatContext.new(model, Clock.season, Clock.weather, Clock.time_of_day(),
+			PlayerData.sighting_counts())
+	var candidates: Array[Vector2i] = []
+	for r: Requirement in data.requirements:
+		candidates.append_array(r.matching_cells(ctx))
+	if not candidates.is_empty():
+		return candidates[_rng.randi_range(0, candidates.size() - 1)]
 	return Vector2i(_rng.randi_range(0, model.width - 1), _rng.randi_range(0, model.height - 1))

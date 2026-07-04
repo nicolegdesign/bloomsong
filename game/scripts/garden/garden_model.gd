@@ -142,10 +142,10 @@ func harvest(cell: Vector2i) -> StringName:
 
 # --- Queries (used by habitat Requirements) ---------------------------------
 
-## Count plants of a category. blooming_season >= 0 additionally requires the plant
-## to be mature and to bloom in that season.
-func count_plants_by_category(category: int, mature_only := true, blooming_season := -1) -> int:
-	var n := 0
+## Cells with plants of a category. blooming_season >= 0 additionally requires the
+## plant to be mature and to bloom in that season.
+func cells_by_category(category: int, mature_only := true, blooming_season := -1) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
 	for cell: Vector2i in placements:
 		var pl: Dictionary = placements[cell]
 		if pl.kind != KIND_PLANT:
@@ -157,34 +157,50 @@ func count_plants_by_category(category: int, mature_only := true, blooming_seaso
 			continue
 		if blooming_season >= 0 and data.bloom_seasons & Types.flag(blooming_season) == 0:
 			continue
-		n += 1
-	return n
+		out.append(cell)
+	return out
 
 
-func count_plant(id: StringName, mature_only := true) -> int:
-	var n := 0
+func count_plants_by_category(category: int, mature_only := true, blooming_season := -1) -> int:
+	return cells_by_category(category, mature_only, blooming_season).size()
+
+
+func cells_by_plant(id: StringName, mature_only := true) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
 	for cell: Vector2i in placements:
 		var pl: Dictionary = placements[cell]
 		if pl.kind == KIND_PLANT and pl.id == id and (not mature_only or pl.was_mature):
-			n += 1
-	return n
+			out.append(cell)
+	return out
 
 
-func count_decoration(id: StringName) -> int:
-	var n := 0
+func count_plant(id: StringName, mature_only := true) -> int:
+	return cells_by_plant(id, mature_only).size()
+
+
+func cells_by_decoration(id: StringName) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
 	for cell: Vector2i in placements:
 		var pl: Dictionary = placements[cell]
 		if pl.kind == KIND_DECORATION and pl.id == id:
-			n += 1
-	return n
+			out.append(cell)
+	return out
+
+
+func count_decoration(id: StringName) -> int:
+	return cells_by_decoration(id).size()
+
+
+func cells_by_terrain(id: StringName) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for cell: Vector2i in terrain:
+		if terrain[cell] == id:
+			out.append(cell)
+	return out
 
 
 func count_terrain(id: StringName) -> int:
-	var n := 0
-	for cell: Vector2i in terrain:
-		if terrain[cell] == id:
-			n += 1
-	return n
+	return cells_by_terrain(id).size()
 
 
 # --- Serialization (JSON-safe: only String/int/bool/Array/Dictionary) -------

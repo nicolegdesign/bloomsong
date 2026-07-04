@@ -10,5 +10,9 @@ func is_met(ctx: HabitatContext) -> bool:
 	return ctx.garden.count_terrain(terrain_id) >= min_cells
 
 
+func matching_cells(ctx: HabitatContext) -> Array[Vector2i]:
+	return ctx.garden.cells_by_terrain(terrain_id)
+
+
 func describe() -> String:
 	return "a patch of %s" % terrain_id

@@ -70,6 +70,39 @@ func test_require_resident_chain(t: Node) -> void:
 	t.check(r.is_met(_ctx(m, 0, 0, 0, {&"rabbit": 2})), "2 sightings meets it (fox-chain works)")
 
 
+func test_matching_cells_anchor_spawns(t: Node) -> void:
+	# ROADMAP 5.4: a spawning resident is anchored near the cells that actually
+	# satisfied its requirements, not a random spot in the garden.
+	var m := GardenModel.new(10, 8)
+	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(2, 3), 1)
+	for i in 5:
+		m.advance_day()  # sunflower matures (2 days) — extra days are harmless
+
+	var cat_req := RequirePlantCategory.new()
+	cat_req.category = Types.PlantCategory.FLOWER
+	cat_req.mature_only = true
+	t.check_eq(cat_req.matching_cells(_ctx(m)), [Vector2i(2, 3)], "category requirement finds the flower cell")
+
+	var plant_req := RequireSpecificPlant.new()
+	plant_req.plant_id = &"sunflower"
+	t.check_eq(plant_req.matching_cells(_ctx(m)), [Vector2i(2, 3)], "specific-plant requirement finds it too")
+
+	m.set_terrain(Vector2i(4, 4), &"long_grass")
+	var terrain_req := RequireTerrain.new()
+	terrain_req.terrain_id = &"long_grass"
+	t.check_eq(terrain_req.matching_cells(_ctx(m)), [Vector2i(4, 4)], "terrain requirement finds the cell")
+
+	m.place(GardenModel.KIND_DECORATION, &"bird_bath", Vector2i(6, 6), 1)
+	var deco_req := RequireDecoration.new()
+	deco_req.decoration_id = &"bird_bath"
+	t.check_eq(deco_req.matching_cells(_ctx(m)), [Vector2i(6, 6)], "decoration requirement finds the cell")
+
+	var resident_req := RequireResident.new()
+	resident_req.resident_id = &"rabbit"
+	t.check(resident_req.matching_cells(_ctx(m)).is_empty(),
+			"resident-chain requirements have no spatial anchor")
+
+
 func test_resident_activity_gates(t: Node) -> void:
 	var data := ResidentData.new()
 	data.active_times = Types.flag(Types.TimeOfDay.MORNING)

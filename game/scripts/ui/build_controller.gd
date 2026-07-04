@@ -9,10 +9,32 @@ enum Mode { TERRAIN, PLANT, DECORATION }
 
 const MODE_NAMES := ["Terrain", "Plant", "Decoration"]
 
+## Emitted whenever mode or selected item changes, from keyboard or the palette UI.
+signal selection_changed
+
 var garden: Garden
 
 var _mode: Mode = Mode.PLANT
 var _index := 0
+
+
+func mode() -> Mode:
+	return _mode
+
+
+func index() -> int:
+	return _index
+
+
+func set_mode(new_mode: Mode) -> void:
+	_mode = new_mode
+	_index = 0
+	selection_changed.emit()
+
+
+func select_index(i: int) -> void:
+	_index = i
+	selection_changed.emit()
 
 
 func current_list() -> Array:
@@ -45,10 +67,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.physical_keycode:
 			KEY_TAB:
-				_mode = ((_mode + 1) % 3) as Mode
-				_index = 0
+				set_mode(((_mode + 1) % 3) as Mode)
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-				_index = event.physical_keycode - KEY_1
+				select_index(event.physical_keycode - KEY_1)
 	elif event is InputEventMouseButton and event.pressed:
 		var cell := garden.cell_at(garden.get_global_mouse_position())
 		if event.button_index == MOUSE_BUTTON_LEFT:

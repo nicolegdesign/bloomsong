@@ -13,3 +13,10 @@ func is_met(_ctx: HabitatContext) -> bool:
 ## Human-readable phrase for diary hints, e.g. "3 flowering plants".
 func describe() -> String:
 	return "?"
+
+
+## Cells in the garden that satisfy this requirement, so a spawning resident can be
+## anchored near what it actually came for (ROADMAP 5.4). Empty = no spatial anchor
+## (e.g. RequireResident, which isn't about a place).
+func matching_cells(_ctx: HabitatContext) -> Array[Vector2i]:
+	return []

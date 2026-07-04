@@ -12,6 +12,10 @@ func _ready() -> void:
 	garden.name = "Garden"
 	add_child(garden)
 
+	var tint := DayNightTint.new()
+	tint.name = "DayNightTint"
+	add_child(tint)
+
 	player = Player.new()
 	player.name = "Player"
 	player.bounds = garden.bounds()
@@ -23,10 +27,28 @@ func _ready() -> void:
 	build.garden = garden
 	add_child(build)
 
+	var weather_layer := CanvasLayer.new()
+	weather_layer.name = "WeatherLayer"
+	weather_layer.layer = 5
+	add_child(weather_layer)
+	var rain := RainEffect.new()
+	rain.name = "Rain"
+	weather_layer.add_child(rain)
+
 	var hud := Hud.new()
 	hud.name = "Hud"
+	hud.layer = 10
 	hud.build = build
 	add_child(hud)
+
+	var discovery := DiscoveryBanner.new()
+	discovery.name = "DiscoveryBanner"
+	discovery.garden = garden
+	add_child(discovery)
+
+	var diary := DiaryUI.new()
+	diary.name = "DiaryUI"
+	add_child(diary)
 
 	if SaveManager.load_game():
 		EventBus.toast.emit("Welcome back to your garden 🌱")
@@ -51,3 +73,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_F10:
 			if SaveManager.load_game():
 				EventBus.toast.emit("Game loaded.")
+		KEY_F12:
+			_start_new_game()
+
+
+## Debug hotkey: wipes the save file and resets every system to fresh-game
+## defaults in place, so testing doesn't require deleting the save by hand
+## between runs (user://saves/, see CLAUDE.md).
+func _start_new_game() -> void:
+	SaveManager.delete_save()
+	Clock.deserialize({})
+	PlayerData.deserialize({})
+	HabitatDirector.reset()
+	garden.load_model(GardenModel.new())
+	EventBus.toast.emit("🌱 New game started.")

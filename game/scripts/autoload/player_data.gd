@@ -42,17 +42,65 @@ func spend_money(amount: int) -> bool:
 	return true
 
 
-## Records a resident visit. Returns true if this is a first-ever sighting (a discovery).
+## Records a resident visit — and which season/weather/time it happened in, so the
+## diary can show favorites (ROADMAP 6.2). Returns true if this is a first-ever
+## sighting (a discovery); the caller (HabitatDirector) emits resident_discovered,
+## since it — not PlayerData — knows where in the garden the sighting happened.
 func record_sighting(resident_id: StringName) -> bool:
 	var is_new := not diary.has(resident_id)
 	if is_new:
-		diary[resident_id] = {"times_seen": 0, "first_seen_day": Clock.day}
-	diary[resident_id].times_seen += 1
+		diary[resident_id] = {
+			"times_seen": 0, "first_seen_day": Clock.day,
+			"season_counts": {}, "weather_counts": {}, "time_counts": {},
+		}
+	var entry: Dictionary = diary[resident_id]
+	entry.times_seen += 1
+	_bump(entry.season_counts, Clock.season)
+	_bump(entry.weather_counts, Clock.weather)
+	_bump(entry.time_counts, Clock.time_of_day())
 	if is_new:
 		var data := ContentDB.get_resident(resident_id)
 		add_xp(data.xp_on_discovery if data != null else 10)
-		EventBus.resident_discovered.emit(resident_id)
 	return is_new
+
+
+func _bump(counts: Dictionary, key: int) -> void:
+	counts[key] = int(counts.get(key, 0)) + 1
+
+
+## JSON round-trips int-keyed dictionaries with string keys; convert back on load.
+func _int_keyed(d: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k in d:
+		out[int(k)] = int(d[k])
+	return out
+
+
+## Most-frequent value in a diary entry's season/weather/time_counts, or -1 if the
+## resident hasn't been seen yet.
+func _favorite(resident_id: StringName, counts_key: String) -> int:
+	if not diary.has(resident_id):
+		return -1
+	var counts: Dictionary = diary[resident_id].get(counts_key, {})
+	var best := -1
+	var best_count := -1
+	for key: int in counts:
+		if int(counts[key]) > best_count:
+			best_count = counts[key]
+			best = key
+	return best
+
+
+func favorite_season(resident_id: StringName) -> int:
+	return _favorite(resident_id, "season_counts")
+
+
+func favorite_weather(resident_id: StringName) -> int:
+	return _favorite(resident_id, "weather_counts")
+
+
+func favorite_time(resident_id: StringName) -> int:
+	return _favorite(resident_id, "time_counts")
 
 
 func record_plant_matured(plant_id: StringName) -> void:
@@ -94,9 +142,13 @@ func sighting_counts() -> Dictionary:
 func serialize() -> Dictionary:
 	var diary_out: Dictionary = {}
 	for id: StringName in diary:
+		var entry: Dictionary = diary[id]
 		diary_out[String(id)] = {
-			"times_seen": diary[id].times_seen,
-			"first_seen_day": diary[id].first_seen_day,
+			"times_seen": entry.times_seen,
+			"first_seen_day": entry.first_seen_day,
+			"season_counts": entry.get("season_counts", {}),
+			"weather_counts": entry.get("weather_counts", {}),
+			"time_counts": entry.get("time_counts", {}),
 		}
 	var grown_out: Dictionary = {}
 	for id: StringName in plants_grown:
@@ -121,6 +173,9 @@ func deserialize(d: Dictionary) -> void:
 		diary[StringName(id)] = {
 			"times_seen": int(entry.get("times_seen", 0)),
 			"first_seen_day": int(entry.get("first_seen_day", 1)),
+			"season_counts": _int_keyed(entry.get("season_counts", {})),
+			"weather_counts": _int_keyed(entry.get("weather_counts", {})),
+			"time_counts": _int_keyed(entry.get("time_counts", {})),
 		}
 	plants_grown.clear()
 	for id: String in d.get("plants_grown", {}):

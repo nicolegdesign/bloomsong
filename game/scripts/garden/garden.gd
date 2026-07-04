@@ -12,6 +12,7 @@ var model := GardenModel.new()
 var _views: Dictionary = {}  # cell (Vector2i) -> Node2D view
 var _placements_layer := Node2D.new()
 var _residents_layer := Node2D.new()
+var _hover_cell := Vector2i(-999, -999)
 
 
 func _ready() -> void:
@@ -23,6 +24,13 @@ func _ready() -> void:
 	SaveManager.register_garden(self)
 	EventBus.day_passed.connect(_on_day_passed)
 	EventBus.season_changed.connect(func(_s: int) -> void: _refresh_all_views())
+
+
+func _process(_delta: float) -> void:
+	var cell := cell_at(get_global_mouse_position())
+	if cell != _hover_cell:
+		_hover_cell = cell
+		queue_redraw()
 
 
 # --- Coordinate helpers ------------------------------------------------------
@@ -154,3 +162,18 @@ func _draw() -> void:
 	# Border.
 	draw_rect(Rect2(Vector2.ZERO, Vector2(model.width, model.height) * CELL),
 			Color(0.2, 0.15, 0.1), false, 3.0)
+	_draw_hover_highlight()
+
+
+## Highlights the cell under the mouse: gold when it's inside the editable garden,
+## dim red when the cursor has wandered past the border. Hidden while the mouse is
+## over a UI control (e.g. the palette) so it doesn't look like it's under the panel.
+func _draw_hover_highlight() -> void:
+	if get_viewport().gui_get_hovered_control() != null:
+		return
+	var rect := Rect2(Vector2(_hover_cell) * CELL, Vector2.ONE * CELL)
+	if model.in_bounds(_hover_cell):
+		draw_rect(rect, Color(1.0, 0.92, 0.55, 0.28))
+		draw_rect(rect, Color(1.0, 0.92, 0.55, 0.9), false, 2.0)
+	else:
+		draw_rect(rect, Color(0.9, 0.2, 0.2, 0.6), false, 2.0)
