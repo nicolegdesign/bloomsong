@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DecorationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/decoration_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"log"
+display_name = "Fallen Log"
+placeholder_color = Color(0.5, 0.36, 0.24, 1)
+price = 10
+unlock_level = 1

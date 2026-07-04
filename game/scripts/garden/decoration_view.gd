@@ -1,0 +1,25 @@
+class_name DecorationView
+extends Node2D
+## Placeholder visual for one decoration: a rounded square in its content color.
+
+const SIZE := 22.0
+
+var _garden: Garden
+var _cell: Vector2i
+
+
+func _init(garden: Garden, cell: Vector2i) -> void:
+	_garden = garden
+	_cell = cell
+
+
+func _draw() -> void:
+	var pl := _garden.model.get_placement(_cell)
+	if pl.is_empty():
+		return
+	var data := ContentDB.get_decoration(pl.id)
+	if data == null:
+		return
+	var rect := Rect2(Vector2.ONE * -SIZE / 2.0, Vector2.ONE * SIZE)
+	draw_rect(rect, data.placeholder_color)
+	draw_rect(rect, data.placeholder_color.darkened(0.4), false, 2.0)

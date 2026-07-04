@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PlantData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/plant_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"sunflower"
+display_name = "Sunflower"
+category = 0
+days_to_mature = 2
+growth_stages = 3
+bloom_seasons = 3
+placeholder_color = Color(0.98, 0.79, 0.2, 1)
+unlock_level = 1
+seed_price = 5
+xp_on_mature = 10

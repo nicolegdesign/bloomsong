@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PlantData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/plant_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"berry_bush"
+display_name = "Berry Bush"
+category = 1
+days_to_mature = 3
+growth_stages = 3
+bloom_seasons = 7
+fruit_item = &"berry"
+fruit_interval_days = 2
+placeholder_color = Color(0.42, 0.56, 0.34, 1)
+unlock_level = 1
+seed_price = 8
+xp_on_mature = 15

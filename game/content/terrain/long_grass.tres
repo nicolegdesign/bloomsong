@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TerrainData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/terrain_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"long_grass"
+display_name = "Long Grass"
+placeholder_color = Color(0.376, 0.62, 0.29, 1)
+plantable = true
+unlock_level = 1

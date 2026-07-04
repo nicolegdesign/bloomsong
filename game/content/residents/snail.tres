@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ResidentData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/resident_data.gd" id="1_res"]
+
+[resource]
+script = ExtResource("1_res")
+id = &"snail"
+display_name = "Snail"
+description = "A tiny, unhurried wanderer that appears whenever the world turns pleasantly damp."
+diary_hint = "Comes out when the garden is wet."
+placeholder_color = Color(0.62, 0.5, 0.38, 1)
+requirements = []
+active_times = 15
+active_seasons = 15
+weather_needed = 4
+xp_on_discovery = 15

@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="ResidentData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/resident_data.gd" id="1_res"]
+[ext_resource type="Script" path="res://scripts/data/require_plant_category.gd" id="2_req"]
+[ext_resource type="Script" path="res://scripts/data/require_decoration.gd" id="3_req"]
+
+[sub_resource type="Resource" id="Resource_req1"]
+script = ExtResource("2_req")
+category = 2
+count = 1
+mature_only = true
+blooming = false
+
+[sub_resource type="Resource" id="Resource_req2"]
+script = ExtResource("3_req")
+decoration_id = &"bird_bath"
+count = 1
+
+[resource]
+script = ExtResource("1_res")
+id = &"robin"
+display_name = "Robin"
+description = "An early riser with a rust-red chest. It sings from the treetops and loves a good splash."
+diary_hint = "An early bird that likes tall trees and a place to bathe."
+placeholder_color = Color(0.78, 0.35, 0.25, 1)
+requirements = [SubResource("Resource_req1"), SubResource("Resource_req2")]
+active_times = 1
+active_seasons = 15
+weather_needed = 0
+leaves_behind = &"feather"
+gift_chance = 0.25
+xp_on_discovery = 25
