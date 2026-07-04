@@ -1,6 +1,6 @@
 # CLAUDE.md — Bloomsong
 
-Cozy top-down gardening/ecosystem game in **Godot 4.x + GDScript**. Read `PLAN.md` for architecture (module boundaries, data formats, the dependency rules in §6 are **binding**) and `ROADMAP.md` for what to build next. Work in roadmap order; check off tasks in `ROADMAP.md` as they're completed.
+Cozy gardening/ecosystem game in three-quarter (3/4) view, built in **Godot 4.x + GDScript**. Art spec and AI prompt templates: `game/assets/PROMPTS.md`. Read `PLAN.md` for architecture (module boundaries, data formats, the dependency rules in §6 are **binding**) and `ROADMAP.md` for what to build next. Work in roadmap order; check off tasks in `ROADMAP.md` as they're completed.
 
 ## The user is a Godot beginner
 

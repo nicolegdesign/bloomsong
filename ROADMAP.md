@@ -127,8 +127,8 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
 
 - [ ] **8.1 First-run experience**: tiny non-blocking hint prompts ("try planting a flower…", "something might like these blooms…") driven by state, dismissible, never a locked tutorial.
       ✅ Test: fresh save → a new player reaches their first discovery without being told the recipe.
-- [ ] **8.2 First art pass (AI assets)**: replace placeholders for the ~15 slice items **plus the player character** using consistent prompt templates per category (documented in `assets/PROMPTS.md`); soft storybook look, transparent PNGs.
-      ✅ Test: everything readable at gameplay zoom; no placeholder circles remain.
+- [ ] **8.2 First art pass (AI assets)**: replace placeholders for the ~15 slice items **plus the player character** per the spec in `game/assets/PROMPTS.md` (3/4 view, 64 px cells, base-anchored transparent PNGs). Includes the scale retune: `CELL` 32→64, camera zoom, player speed, wander radii, Y-sorted sprite rendering replacing the drawn circles.
+      ✅ Test: everything readable at gameplay zoom; sprites overlap correctly (character can stand behind a tree); no placeholder circles remain.
 - [ ] **8.3 Audio pass**: one calm music loop, ambient birdsong by time-of-day, soft SFX for plant/harvest/discover/UI.
       ✅ Test: play with sound on — nothing harsh, discovery sound feels rewarding.
 - [ ] **8.4 Balance pass**: tune growth times (first discovery within ~5 minutes), XP curve, prices; keep all tunables in the `.tres` files, not code.
