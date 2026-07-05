@@ -1,11 +1,13 @@
-[gd_resource type="Resource" script_class="DecorationData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="DecorationData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/decoration_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/decorations/bird_bath.png" id="2_tex"]
 
 [resource]
 script = ExtResource("1_script")
 id = &"bird_bath"
 display_name = "Bird Bath"
 placeholder_color = Color(0.75, 0.8, 0.85, 1)
+texture = ExtResource("2_tex")
 price = 40
 unlock_level = 3

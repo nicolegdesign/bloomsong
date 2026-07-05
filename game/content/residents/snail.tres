@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="ResidentData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ResidentData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/resident_data.gd" id="1_res"]
+[ext_resource type="Texture2D" path="res://assets/art/residents/snail.png" id="2_tex"]
 
 [resource]
 script = ExtResource("1_res")
@@ -9,6 +10,9 @@ display_name = "Snail"
 description = "A tiny, unhurried wanderer that appears whenever the world turns pleasantly damp."
 diary_hint = "Comes out when the garden is wet."
 placeholder_color = Color(0.62, 0.5, 0.38, 1)
+texture = ExtResource("2_tex")
+display_box_cells = Vector2(0.75, 0.75)
+texture_centered = true
 requirements = []
 active_times = 15
 active_seasons = 15

@@ -169,6 +169,18 @@ Empty until the style board session.)*
   note. Wired in `content/plants/blackberry_bush.tres` (renamed from `berry_bush`) via
   `stage_textures` (0–2) + the new `PlantData.fruiting_texture` override, which `PlantView`
   swaps in whenever `fruit_ready` is true instead of the plain mature sprite.
+- **First resident + decoration art (butterfly, snail, robin, bird bath):** ✅ 2026-07-05 —
+  §5.5/§5.4 templates + style board. First non-plant textures, so `ResidentData`/
+  `DecorationData` gained a `texture` field and `PlantView`'s aspect-fit/baseline-anchor math
+  was extracted into a shared `SpriteAnchor.draw_fitted()` for all three view types. Butterfly
+  and snail are the "small resident" category (§3 table) — `display_box_cells = (0.75, 0.75)`
+  and `texture_centered = true`, since a flier/tiny critter has no meaningful "feet" point.
+  Robin and the bird bath use the default medium/upright boxes with normal bottom-anchoring.
+  **Rabbit was rejected** on the first pass: that export had no alpha channel — a literal
+  checkerboard baked in as opaque pixels instead of real transparency.
+- **Rabbit (idle), re-exported:** ✅ 2026-07-05 — same §5.5 template + style board, this time
+  with a real alpha channel. Wired in `content/residents/rabbit.tres` with the default
+  medium/bottom-anchored box (no `texture_centered`, unlike butterfly/snail).
 
 ## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 

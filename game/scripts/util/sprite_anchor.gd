@@ -41,3 +41,21 @@ static func bottom_margin(texture: Texture2D) -> int:
 				break
 	_cache[key] = margin
 	return margin
+
+
+## Aspect-fits `texture` into `box_size` (in the caller's local units) and draws it
+## on `canvas` at the local origin — the shared "grow in place, never float or
+## jump" logic used by every view with art (plants, residents, decorations).
+## `centered`: true centers the sprite on the origin (PROMPTS.md's small-resident
+## category — butterflies, snails); false (the default) puts the origin at the
+## texture's true visual baseline (bottom_margin), so it's ground-anchored like
+## plants and upright decorations.
+static func draw_fitted(canvas: CanvasItem, texture: Texture2D, box_size: Vector2,
+		centered: bool = false) -> void:
+	var s := minf(box_size.x / texture.get_width(), box_size.y / texture.get_height())
+	var size := Vector2(texture.get_width(), texture.get_height()) * s
+	if centered:
+		canvas.draw_texture_rect(texture, Rect2(-size / 2.0, size), false)
+	else:
+		var baseline := bottom_margin(texture) * s
+		canvas.draw_texture_rect(texture, Rect2(Vector2(-size.x / 2.0, -size.y + baseline), size), false)

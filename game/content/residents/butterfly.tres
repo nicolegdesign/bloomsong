@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="ResidentData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="ResidentData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/resident_data.gd" id="1_res"]
 [ext_resource type="Script" path="res://scripts/data/require_plant_category.gd" id="2_req"]
+[ext_resource type="Texture2D" path="res://assets/art/residents/butterfly.png" id="3_tex"]
 
 [sub_resource type="Resource" id="Resource_req1"]
 script = ExtResource("2_req")
@@ -17,6 +18,9 @@ display_name = "Butterfly"
 description = "A cheerful visitor that drifts from bloom to bloom, sipping nectar in the warm sun."
 diary_hint = "Flutters in on sunny days when plenty of flowers are in bloom."
 placeholder_color = Color(0.95, 0.55, 0.15, 1)
+texture = ExtResource("3_tex")
+display_box_cells = Vector2(0.75, 0.75)
+texture_centered = true
 requirements = [SubResource("Resource_req1")]
 behaviors = 5
 active_times = 3

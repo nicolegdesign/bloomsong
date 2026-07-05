@@ -37,7 +37,7 @@ func _draw() -> void:
 	var used_fruiting_texture := bool(pl.was_mature) and fruit_ready and data.fruiting_texture != null
 	var texture := data.fruiting_texture if used_fruiting_texture else _texture_for(pl, data)
 	if texture != null:
-		_draw_texture_anchored(texture)
+		SpriteAnchor.draw_fitted(self, texture, BOX_CELLS * Garden.CELL)
 	else:
 		_draw_placeholder(pl, data)
 	# The dedicated fruiting texture already shows the fruit visually; the small
@@ -53,16 +53,6 @@ func _texture_for(pl: Dictionary, data: PlantData) -> Texture2D:
 	if stage < data.stage_textures.size() and data.stage_textures[stage] != null:
 		return data.stage_textures[stage]
 	return null
-
-
-## Aspect-fits the texture into the display box with the ARTWORK's baseline (not the
-## canvas bottom — see SpriteAnchor) on the cell's bottom edge (this node's origin).
-func _draw_texture_anchored(texture: Texture2D) -> void:
-	var box := BOX_CELLS * Garden.CELL
-	var s := minf(box.x / texture.get_width(), box.y / texture.get_height())
-	var size := Vector2(texture.get_width(), texture.get_height()) * s
-	var baseline := SpriteAnchor.bottom_margin(texture) * s
-	draw_texture_rect(texture, Rect2(Vector2(-size.x / 2.0, -size.y + baseline), size), false)
 
 
 ## Pre-art fallback: the growing colored circle (bottom-anchored like the sprites).

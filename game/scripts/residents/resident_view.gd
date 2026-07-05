@@ -3,8 +3,8 @@ extends Node2D
 ## A visiting resident: purely cosmetic wandering near its home point (PLAN.md §6 —
 ## residents never change game state; despawning them is always safe). Cycles
 ## between wander / rest / eat depending on ResidentData.behaviors (ROADMAP 5.4).
-## Placeholder visual: a colored circle with an outline; rest/eat show as a gentle
-## bob in place until real sprite animations exist.
+## Renders ResidentData's idle texture when present, falling back to a colored
+## circle otherwise; rest/eat show as a gentle bob in place until real animations exist.
 
 const WANDER_RADIUS := 144.0
 const RADIUS := 14.0
@@ -85,5 +85,9 @@ func _pause_for(state: State) -> float:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, RADIUS, data.placeholder_color)
-	draw_arc(Vector2.ZERO, RADIUS, 0, TAU, 20, Color(1, 1, 1, 0.9), 1.5)
+	if data.texture != null:
+		SpriteAnchor.draw_fitted(self, data.texture, data.display_box_cells * Garden.CELL,
+				data.texture_centered)
+	else:
+		draw_circle(Vector2.ZERO, RADIUS, data.placeholder_color)
+		draw_arc(Vector2.ZERO, RADIUS, 0, TAU, 20, Color(1, 1, 1, 0.9), 1.5)

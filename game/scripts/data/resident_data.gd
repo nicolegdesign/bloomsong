@@ -13,6 +13,16 @@ const BEHAVIOR_WANDER := 1
 const BEHAVIOR_REST := 2
 const BEHAVIOR_EAT := 4
 @export var placeholder_color: Color = Color.WHITE
+## Idle sprite (PROMPTS.md §5.5). Empty = placeholder circle rendering.
+@export var texture: Texture2D
+## Aspect-fit display box in cells at the 64px art scale (PROMPTS.md's per-category
+## table): 0.75×0.75 (48×48) for small residents (snail, butterfly), 1×1 (64×64)
+## for medium ones (bird, rabbit).
+@export var display_box_cells: Vector2 = Vector2(1.0, 1.0)
+## True for small fliers/critters (PROMPTS.md's "Resident (small)" category): the
+## sprite is simply centered on the resident's position instead of bottom-anchored
+## — a butterfly or snail has no meaningful "feet" point.
+@export var texture_centered: bool = false
 @export var requirements: Array[Requirement] = []
 ## Which wandering behaviors this resident cycles through (ROADMAP 5.4). Wander is
 ## always available even if unset, so a resident is never stuck standing still.

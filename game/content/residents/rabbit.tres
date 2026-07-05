@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="ResidentData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="ResidentData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/resident_data.gd" id="1_res"]
 [ext_resource type="Script" path="res://scripts/data/require_plant_category.gd" id="2_req"]
 [ext_resource type="Script" path="res://scripts/data/require_terrain.gd" id="3_req"]
+[ext_resource type="Texture2D" path="res://assets/art/residents/rabbit.png" id="4_tex"]
 
 [sub_resource type="Resource" id="Resource_req1"]
 script = ExtResource("2_req")
@@ -23,6 +24,7 @@ display_name = "Rabbit"
 description = "A soft, twitchy-nosed nibbler that hides among the bushes and tall grass."
 diary_hint = "Nibbles near bushes where the grass grows tall."
 placeholder_color = Color(0.8, 0.78, 0.72, 1)
+texture = ExtResource("4_tex")
 requirements = [SubResource("Resource_req1"), SubResource("Resource_req2")]
 behaviors = 3
 active_times = 7
