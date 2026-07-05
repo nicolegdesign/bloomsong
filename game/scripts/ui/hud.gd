@@ -11,6 +11,7 @@ var _help := Label.new()      # above the palette: controls
 var _toast := Label.new()     # center: transient messages
 var _diary_button := Button.new()  # top-right: opens the diary
 var _shop_button := Button.new()   # top-right: opens the shop
+var _music_button := Button.new()  # top-right: mutes/unmutes the music
 var _xp_bar := ProgressBar.new()   # top-right: visible XP progress (ROADMAP 7.1)
 var _xp_label := Label.new()       # overlaid on the bar: "120 / 200 xp"
 var _level_label := Label.new()    # top-right, beside the bar: "Lv 1"
@@ -31,7 +32,7 @@ func _ready() -> void:
 	_help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	_help.position.y -= PaletteUI.BAR_HEIGHT + 22
 	_help.position.x = 10
-	_help.text = "WASD move · click palette or 1-9 select, Tab mode · LMB place/harvest · RMB remove · J diary · K shop · N next day · F9 save · F10 load · F12 new game"
+	_help.text = "WASD move · click palette or 1-9 select, Tab mode · LMB place/harvest · RMB remove · J diary · K shop · M mute · N next day · F9 save · F10 load · F12 new game"
 	_help.add_theme_font_size_override("font_size", 13)
 	_level_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_level_label.position = Vector2(-360, 28)
@@ -99,8 +100,16 @@ func _ready() -> void:
 	_shop_button.pressed.connect(func() -> void: EventBus.toggle_shop.emit())
 	add_child(_shop_button)
 
+	_music_button.text = "🔊 Music (M)"
+	_music_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_music_button.position = Vector2(-150, 128)
+	_music_button.size = Vector2(140, 32)
+	_music_button.pressed.connect(func() -> void: EventBus.toggle_mute.emit())
+	add_child(_music_button)
+
 	EventBus.toast.connect(show_toast)
 	EventBus.level_up.connect(_on_level_up)
+	EventBus.music_muted_changed.connect(_on_music_muted_changed)
 
 
 func _process(delta: float) -> void:
@@ -139,3 +148,7 @@ func _on_level_up(level: int, unlocked_names: Array) -> void:
 	if not unlocked_names.is_empty():
 		msg += "  Unlocked: %s" % ", ".join(unlocked_names)
 	show_toast(msg)
+
+
+func _on_music_muted_changed(muted: bool) -> void:
+	_music_button.text = "🔇 Music (M)" if muted else "🔊 Music (M)"

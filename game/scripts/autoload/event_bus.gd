@@ -35,3 +35,5 @@ signal game_loaded
 signal game_saved
 signal toggle_diary
 signal toggle_shop
+signal toggle_mute
+signal music_muted_changed(muted: bool)

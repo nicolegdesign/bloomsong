@@ -16,6 +16,10 @@ func _ready() -> void:
 	tint.name = "DayNightTint"
 	add_child(tint)
 
+	var music := MusicPlayer.new()
+	music.name = "MusicPlayer"
+	add_child(music)
+
 	player = Player.new()
 	player.name = "Player"
 	player.bounds = garden.bounds()
