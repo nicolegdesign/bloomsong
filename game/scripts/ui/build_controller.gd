@@ -81,8 +81,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _apply(cell: Vector2i) -> void:
-	# Ripe fruit always harvests first, regardless of mode.
+	# Harvests always win, regardless of mode: ripe fruit first, then whole-plant
+	# cutting (e.g. a mature sunflower).
 	if garden.harvest(cell):
+		return
+	if garden.harvest_whole(cell):
 		return
 	var item := current_item()
 	if item == null:
@@ -91,6 +94,19 @@ func _apply(cell: Vector2i) -> void:
 		Mode.TERRAIN:
 			garden.set_terrain(item.id, cell)
 		Mode.PLANT:
+			# Explain a soil refusal instead of failing silently.
+			if garden.model.in_bounds(cell) and not garden.model.is_occupied(cell) \
+					and not garden.model.soil_ok(item.id, cell):
+				EventBus.toast.emit("%s needs %s." % [item.display_name, _soil_names(item)])
+				return
 			garden.place(GardenModel.KIND_PLANT, item.id, cell)
 		Mode.DECORATION:
 			garden.place(GardenModel.KIND_DECORATION, item.id, cell)
+
+
+func _soil_names(plant: PlantData) -> String:
+	var names: Array[String] = []
+	for terrain_id in plant.allowed_terrain:
+		var t := ContentDB.get_terrain(terrain_id)
+		names.append(t.display_name if t != null else String(terrain_id))
+	return " or ".join(names)

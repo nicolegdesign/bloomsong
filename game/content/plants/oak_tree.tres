@@ -10,6 +10,7 @@ category = 2
 days_to_mature = 5
 growth_stages = 4
 bloom_seasons = 1
+allowed_terrain = [&"dirt"]
 placeholder_color = Color(0.25, 0.45, 0.25, 1)
 unlock_level = 3
 seed_price = 12

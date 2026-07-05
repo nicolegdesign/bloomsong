@@ -58,6 +58,7 @@ func test_place_consumes_and_remove_refunds_seed(t: Node) -> void:
 	var garden := Garden.new()
 	t.add_child(garden)
 
+	garden.set_terrain(&"dirt", Vector2i(0, 0))  # sunflowers need dirt (soil preference)
 	t.check(garden.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(0, 0)),
 			"placing succeeds with a seed in stock")
 	t.check(not PlayerData.has_seed(&"sunflower"), "stock consumed after placing")

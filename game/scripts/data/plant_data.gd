@@ -10,10 +10,17 @@ extends Resource
 ## Number of visual growth stages, including the mature one.
 @export var growth_stages := 3
 @export_flags("Spring:1", "Summer:2", "Fall:4", "Winter:8") var bloom_seasons: int = 1
+## Soil preference: terrain ids this plant can be planted on. Currently all plants
+## want dirt; later content can list short_grass (wildflowers), water/mud (aquatics).
+@export var allowed_terrain: Array[StringName] = [&"dirt"]
 ## Item produced when mature (empty StringName = no fruit).
 @export var fruit_item: StringName
 ## Days between fruit harvests once mature.
 @export var fruit_interval_days := 2
+## One-shot harvest: if set, clicking the MATURE plant removes the whole plant and
+## collects this item (e.g. cutting a sunflower). Distinct from fruit_item, which
+## repeats and leaves the plant standing.
+@export var harvest_whole_item: StringName
 @export var placeholder_color: Color = Color.WHITE
 @export var unlock_level := 1
 @export var seed_price := 5

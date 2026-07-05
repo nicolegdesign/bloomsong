@@ -16,26 +16,73 @@ func test_terrain_painting(t: Node) -> void:
 	t.check(not m.set_terrain(Vector2i(2, 2), &"dirt"), "repainting same terrain is a no-op")
 	t.check(not m.set_terrain(Vector2i(99, 0), &"dirt"), "out of bounds rejected")
 	t.check(not m.set_terrain(Vector2i(3, 3), &"lava"), "unknown terrain rejected")
+	m.set_terrain(Vector2i(4, 4), &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(4, 4), 1)
-	t.check(not m.set_terrain(Vector2i(4, 4), &"dirt"), "terrain locked under a placement")
+	t.check(not m.set_terrain(Vector2i(4, 4), &"long_grass"), "terrain locked under a placement")
 
 
 func test_placement_rules(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
-	t.check(m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(1, 1), 1), "plant on grass ok")
+	t.check(not m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(1, 1), 1),
+			"grass rejected — sunflowers need dirt (soil preference)")
+	m.set_terrain(Vector2i(1, 1), &"dirt")
+	t.check(m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(1, 1), 1), "plant on dirt ok")
 	t.check(not m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(1, 1), 1), "occupied cell rejected")
 	t.check(not m.place(GardenModel.KIND_PLANT, &"space_cactus", Vector2i(2, 2), 1), "unknown plant rejected")
 	m.set_terrain(Vector2i(3, 3), &"water")
-	t.check(not m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(3, 3), 1), "unplantable terrain rejected")
-	t.check(m.place(GardenModel.KIND_DECORATION, &"bird_bath", Vector2i(5, 5), 1), "decoration placement ok")
+	t.check(not m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(3, 3), 1), "water not in sunflower soils")
+	t.check(m.place(GardenModel.KIND_DECORATION, &"bird_bath", Vector2i(5, 5), 1), "decoration on grass ok")
+	t.check(not m.place(GardenModel.KIND_DECORATION, &"bird_bath", Vector2i(3, 3), 1),
+			"decoration on water rejected (TerrainData.plantable)")
 	t.check(m.remove(Vector2i(9, 7)).is_empty(), "removing an empty cell returns {}")
 	t.check_eq(m.remove(Vector2i(1, 1)).get("id"), &"sunflower", "remove returns the placement")
 	t.check(not m.is_occupied(Vector2i(1, 1)), "cell free after remove")
 
 
+func test_soil_preferences(t: Node) -> void:
+	var m := GardenModel.new(10, 8)
+	t.check(not m.soil_ok(&"sunflower", Vector2i(0, 0)), "grass is not sunflower soil")
+	m.set_terrain(Vector2i(0, 0), &"dirt")
+	t.check(m.soil_ok(&"sunflower", Vector2i(0, 0)), "dirt is sunflower soil")
+	# Future-proofing: a plant listing water as its soil is plantable there even
+	# though water blocks decorations — aquatic plants (Phase 11) rely on this.
+	var lily := PlantData.new()
+	lily.id = &"test_lily"
+	var soils: Array[StringName] = [&"water"]
+	lily.allowed_terrain = soils
+	ContentDB.plants[lily.id] = lily
+	m.set_terrain(Vector2i(1, 0), &"water")
+	t.check(m.place(GardenModel.KIND_PLANT, &"test_lily", Vector2i(1, 0), 1),
+			"aquatic plant plantable on water via its own soil list")
+	ContentDB.plants.erase(lily.id)
+
+
+func test_harvest_whole(t: Node) -> void:
+	var m := GardenModel.new(10, 8)
+	var cell := Vector2i(2, 2)
+	m.set_terrain(cell, &"dirt")
+	m.place(GardenModel.KIND_PLANT, &"sunflower", cell, 1)
+	t.check_eq(m.harvest_whole(cell), &"", "immature plant can't be cut")
+	m.advance_day()
+	m.advance_day()  # sunflower matures (2 days)
+	t.check_eq(m.harvest_whole(cell), &"sunflower_bloom", "mature sunflower cut for its bloom")
+	t.check(not m.is_occupied(cell), "whole plant removed by the harvest")
+	t.check_eq(m.harvest_whole(cell), &"", "empty cell yields nothing")
+	# Bloom sells for more than the seed cost — the loop must profit (PLAN.md §8).
+	var bloom := ContentDB.get_item(&"sunflower_bloom")
+	var seed_cost: int = ContentDB.get_plant(&"sunflower").seed_price
+	t.check(bloom != null and bloom.sell_price > seed_cost, "bloom sells above seed price")
+	# Plants without harvest_whole_item are not cuttable.
+	m.place(GardenModel.KIND_PLANT, &"berry_bush", cell, 1)
+	for i in 3:
+		m.advance_day()
+	t.check_eq(m.harvest_whole(cell), &"", "berry bush is not whole-harvestable")
+
+
 func test_growth_to_maturity(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
 	var cell := Vector2i(2, 2)
+	m.set_terrain(cell, &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"sunflower", cell, 1)  # days_to_mature = 2, 3 stages
 	t.check_eq(m.stage_of(cell), 0, "starts at stage 0")
 	t.check(not m.is_mature(cell), "not mature at day 0")
@@ -53,6 +100,7 @@ func test_growth_to_maturity(t: Node) -> void:
 func test_fruit_cycle(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
 	var cell := Vector2i(2, 2)
+	m.set_terrain(cell, &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"berry_bush", cell, 1)  # mature 3d, fruit every 2d
 	for i in 3:
 		m.advance_day()
@@ -70,6 +118,8 @@ func test_fruit_cycle(t: Node) -> void:
 
 func test_category_queries(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
+	for x in 3:
+		m.set_terrain(Vector2i(x, 0), &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(0, 0), 1)
 	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(1, 0), 1)
 	m.place(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(2, 0), 1)
@@ -90,6 +140,7 @@ func test_serialize_round_trip(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
 	m.set_terrain(Vector2i(0, 1), &"long_grass")
 	m.set_terrain(Vector2i(1, 1), &"water")
+	m.set_terrain(Vector2i(4, 4), &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"berry_bush", Vector2i(4, 4), 3)
 	m.place(GardenModel.KIND_DECORATION, &"log", Vector2i(5, 5), 3)
 	for i in 4:
@@ -99,7 +150,7 @@ func test_serialize_round_trip(t: Node) -> void:
 	var m2 := GardenModel.deserialize(JSON.parse_string(json))
 	t.check_eq(m2.width, 10, "width restored")
 	t.check_eq(m2.count_terrain(&"water"), 1, "terrain restored")
-	t.check_eq(m2.count_terrain(&"short_grass"), 78, "default terrain restored")
+	t.check_eq(m2.count_terrain(&"short_grass"), 77, "default terrain restored")
 	t.check(m2.is_mature(Vector2i(4, 4)), "growth state restored")
 	t.check_eq(int(m2.get_placement(Vector2i(4, 4)).days_grown), 4, "days_grown restored")
 	t.check_eq(m2.count_decoration(&"log"), 1, "decoration restored")

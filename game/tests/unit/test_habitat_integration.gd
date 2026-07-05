@@ -12,9 +12,11 @@ func test_full_discovery_flow(t: Node) -> void:
 	t.add_child(garden)  # _ready registers it with HabitatDirector/SaveManager
 
 	# Build the butterfly habitat: 3 sunflowers, grown to bloom. Garden.place() now
-	# draws from purchased stock (ROADMAP 7.5), so stock up first.
+	# draws from purchased stock (ROADMAP 7.5), so stock up first — and sunflowers
+	# need dirt (soil preference), so till the soil first.
 	PlayerData.add_seed(&"sunflower", 3)
 	for i in 3:
+		garden.set_terrain(&"dirt", Vector2i(i, 0))
 		t.check(garden.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(i, 0)),
 				"sunflower %d planted" % i)
 	EventBus.day_passed.emit(2)

@@ -10,6 +10,7 @@ category = 1
 days_to_mature = 3
 growth_stages = 3
 bloom_seasons = 7
+allowed_terrain = [&"dirt"]
 fruit_item = &"berry"
 fruit_interval_days = 2
 placeholder_color = Color(0.42, 0.56, 0.34, 1)

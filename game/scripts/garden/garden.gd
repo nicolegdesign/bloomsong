@@ -109,6 +109,22 @@ func harvest(cell: Vector2i) -> bool:
 	return true
 
 
+## Cuts a whole mature plant (e.g. a sunflower) for its harvest item. The plant is
+## removed and the item goes to inventory — no seed refund; this is the reward path,
+## unlike remove(). Returns true if something was cut.
+func harvest_whole(cell: Vector2i) -> bool:
+	var item_id := model.harvest_whole(cell)
+	if item_id == &"":
+		return false
+	PlayerData.add_item(item_id, 1)
+	var item := ContentDB.get_item(item_id)
+	if item != null:
+		EventBus.toast.emit("Harvested: %s" % item.display_name)
+	_free_view(cell)
+	EventBus.placement_changed.emit(cell)
+	return true
+
+
 func add_resident_view(view: Node2D) -> void:
 	_residents_layer.add_child(view)
 

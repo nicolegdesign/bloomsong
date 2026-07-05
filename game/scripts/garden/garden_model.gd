@@ -55,13 +55,15 @@ func is_occupied(cell: Vector2i) -> bool:
 func place(kind: StringName, id: StringName, cell: Vector2i, day: int) -> bool:
 	if not in_bounds(cell) or placements.has(cell):
 		return false
-	var t: TerrainData = ContentDB.get_terrain(get_terrain(cell))
-	if t == null or not t.plantable:
-		return false
-	if kind == KIND_PLANT and ContentDB.get_plant(id) == null:
-		return false
-	if kind == KIND_DECORATION and ContentDB.get_decoration(id) == null:
-		return false
+	if kind == KIND_PLANT:
+		# Plants follow their own soil preference (PlantData.allowed_terrain), which
+		# may include terrain that blocks decorations — e.g. aquatics on water.
+		if ContentDB.get_plant(id) == null or not soil_ok(id, cell):
+			return false
+	elif kind == KIND_DECORATION:
+		var t: TerrainData = ContentDB.get_terrain(get_terrain(cell))
+		if t == null or not t.plantable or ContentDB.get_decoration(id) == null:
+			return false
 	placements[cell] = {
 		"id": id, "kind": kind, "planted_day": day,
 		"days_grown": 0, "fruit_days": 0, "fruit_ready": false, "was_mature": false,
@@ -138,6 +140,26 @@ func harvest(cell: Vector2i) -> StringName:
 	pl.fruit_ready = false
 	pl.fruit_days = 0
 	return data.fruit_item
+
+
+## Soil preference check only — placement additionally needs the cell in bounds
+## and unoccupied. Kept separate so the UI can explain a refusal ("needs Dirt").
+func soil_ok(plant_id: StringName, cell: Vector2i) -> bool:
+	var data: PlantData = ContentDB.get_plant(plant_id)
+	return data != null and get_terrain(cell) in data.allowed_terrain
+
+
+## One-shot whole-plant harvest (e.g. cutting a mature sunflower): removes the
+## plant and returns its harvest_whole_item ("" if not mature/harvestable).
+func harvest_whole(cell: Vector2i) -> StringName:
+	var pl := get_placement(cell)
+	if pl.is_empty() or pl.kind != KIND_PLANT or not bool(pl.was_mature):
+		return &""
+	var data: PlantData = ContentDB.get_plant(pl.id)
+	if data == null or data.harvest_whole_item == &"":
+		return &""
+	placements.erase(cell)
+	return data.harvest_whole_item
 
 
 # --- Queries (used by habitat Requirements) ---------------------------------

@@ -10,6 +10,7 @@ func _ctx(garden: GardenModel, season := Types.Season.SPRING, weather := Types.W
 func _garden_with_mature_flowers(count: int) -> GardenModel:
 	var m := GardenModel.new(10, 8)
 	for i in count:
+		m.set_terrain(Vector2i(i, 0), &"dirt")  # sunflowers need dirt (soil preference)
 		m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(i, 0), 1)
 	m.advance_day()
 	m.advance_day()
@@ -32,6 +33,7 @@ func test_require_specific_plant(t: Node) -> void:
 	r.plant_id = &"oak_tree"
 	var m := GardenModel.new(10, 8)
 	t.check(not r.is_met(_ctx(m)), "empty garden fails")
+	m.set_terrain(Vector2i(0, 0), &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(0, 0), 1)
 	t.check(not r.is_met(_ctx(m)), "sapling doesn't count (mature_only)")
 	for i in 5:
@@ -74,6 +76,7 @@ func test_matching_cells_anchor_spawns(t: Node) -> void:
 	# ROADMAP 5.4: a spawning resident is anchored near the cells that actually
 	# satisfied its requirements, not a random spot in the garden.
 	var m := GardenModel.new(10, 8)
+	m.set_terrain(Vector2i(2, 3), &"dirt")  # sunflowers need dirt (soil preference)
 	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(2, 3), 1)
 	for i in 5:
 		m.advance_day()  # sunflower matures (2 days) — extra days are harmless
