@@ -5,6 +5,9 @@ extends Node2D
 ## Asks Garden to act (via BuildController); never mutates the grid itself.
 
 const SPEED := 150.0
+const FARMER_TEXTURE := preload("res://assets/art/player/farmer.png")
+## Display box in cells (art spec: character 64×96 at 64 px cells → 1 × 1.5).
+const BOX_CELLS := Vector2(1.0, 1.5)
 
 var bounds := Rect2()
 
@@ -12,7 +15,8 @@ var _camera := Camera2D.new()
 
 
 func _ready() -> void:
-	z_index = 20
+	# No z_index boost: the player Y-sorts against plants/decorations (walks behind
+	# a sunflower that's lower on screen). Position = the character's FEET.
 	_camera.position_smoothing_enabled = true
 	_camera.position_smoothing_speed = 6.0
 	_camera.zoom = Vector2(1.5, 1.5)
@@ -37,7 +41,8 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	# Placeholder character: body + head + hat brim, so it reads as "a person".
-	draw_circle(Vector2(0, 2), 8.0, Color(0.85, 0.45, 0.3))       # body
-	draw_circle(Vector2(0, -8), 5.5, Color(0.98, 0.85, 0.7))      # head
-	draw_arc(Vector2(0, -9), 7.0, PI, TAU, 16, Color(0.95, 0.8, 0.3), 3.0)  # straw hat
+	# The farmer sprite, aspect-fit into the display box, feet at the origin.
+	var box := BOX_CELLS * Garden.CELL
+	var s := minf(box.x / FARMER_TEXTURE.get_width(), box.y / FARMER_TEXTURE.get_height())
+	var size := Vector2(FARMER_TEXTURE.get_width(), FARMER_TEXTURE.get_height()) * s
+	draw_texture_rect(FARMER_TEXTURE, Rect2(Vector2(-size.x / 2.0, -size.y), size), false)

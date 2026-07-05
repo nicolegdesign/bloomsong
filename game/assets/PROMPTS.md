@@ -31,10 +31,18 @@ better in-game than fifteen gorgeous images in fifteen styles.
 
 ## 3. Sizes & specs
 
-The game uses **64 px ground cells**. Generate large (AI tools output ~1024 px), then
-downscale to the target before importing (macOS: open PNG in Preview → Tools → Adjust Size).
-Keep the original 1024 px file in `assets/art/_source/` — you'll want it for the diary,
-marketing, or re-exports.
+Generate large (AI tools output ~1024 px) on a transparent background. Keep the original
+in `assets/art/_source/` (for the diary, marketing, re-exports), then create the in-game
+copy with a one-line proportional downscale — no exact-size cropping needed, because the
+game **aspect-fits** each sprite into its display box:
+
+    sips -Z 192 <original.png> --out game/assets/art/<category>/<id>.png
+
+192 px max-dimension is ~2–3× the on-screen size: crisp when zoomed, tiny on disk.
+**Never crop or trim growth stages individually** — all stages of one plant must share the
+same source canvas, because that shared canvas is exactly what keeps a sprout correctly
+small relative to the mature plant when both render in the same box. The table below gives
+the display boxes the game fits sprites into (at the 64 px-cell art scale):
 
 | Category | In-game target (px) | Canvas & anchoring |
 |---|---|---|
@@ -151,12 +159,39 @@ Empty until the style board session.)*
   image to every asset-generation session with "match this style exactly." Character canon:
   girl gardener, wide straw hat with daisy, brown braid, white shirt, green overalls, yellow
   neckerchief, brown gloves and boots.
+- **Sunflower (stages 0–2) + planted_dirt:** ✅ 2026-07-05 — §5.2 template + style board;
+  same-canvas series so relative stage scale is preserved. Wired in
+  `content/plants/sunflower.tres`; `planted_dirt.png` is the shared day-0 mound for ALL plants.
+- **Farmer (idle):** ✅ 2026-07-05 — §5.6 template + style board. In-game via
+  `scripts/player/player.gd` preload. Turnaround sheet (front/side/back) still to generate.
 
-## 7. Importing into Godot (beginner steps)
+## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 
-1. Downscale the PNG to its target size (§3 table) and name it after the content id.
-2. In Finder, drag it into the matching folder under `game/assets/art/` — Godot
-   auto-imports it (you'll see it appear in the **FileSystem dock**, bottom-left).
-3. Wiring textures into `PlantData`/`ResidentData` and swapping the placeholder renderer
-   for sprites is roadmap task **8.2** (a code task — ask your AI session to do it and it
-   will find this spec).
+The sunflower and farmer are the reference implementation. For a new plant `foo`:
+
+1. **Files in.** Save the transparent originals to `game/assets/art/_source/`, then
+   downscale each into place, named by content id + stage index:
+   `sips -Z 192 game/assets/art/_source/foo_0.png --out game/assets/art/plants/foo_0.png` … etc.
+   Godot auto-imports them on next launch (they appear in the FileSystem dock).
+2. **Wire the .tres.** Copy the pattern from `content/plants/sunflower.tres` exactly:
+   one `[ext_resource type="Texture2D" …]` per stage PNG, a `stage_textures = [ExtResource…]`
+   array (index = stage), and `load_steps` bumped by the number of textures.
+   Beginner-friendly alternative, in the Godot editor: click the `.tres` in the FileSystem
+   dock → in the Inspector expand **Stage Textures** → set the array size → drag each PNG
+   from the FileSystem dock into its slot.
+3. **Day 0 is free.** Every plant shows the shared `assets/art/plants/planted_dirt.png`
+   mound on the day it's planted, before any growth — no per-plant art for that state.
+4. **No code changes for plants.** `PlantView` renders `stage_textures` when present and
+   falls back to placeholder circles when the array is empty — partially-arted content
+   always still runs. Sprites are bottom-anchored (base on the cell's bottom edge) and
+   Y-sorted so the player walks behind tall plants; the display box per category is the
+   `BOX_CELLS` constant in the view script.
+5. **Verify.** Run the test suite, then F5: plant it, press N through every stage.
+   Check that it sits on its cell, the sprout is smaller than the mature plant, and the
+   farmer occludes/is occluded correctly walking around it.
+
+The player character is `assets/art/player/farmer.png`, preloaded in
+`scripts/player/player.gd` — replacing that file replaces the character. Residents,
+decorations, terrain tiles, and item icons still render placeholders; when their art
+arrives, add a texture field to their data class and textured drawing to their view,
+the same way `PlantView._draw_texture_anchored()` does it.

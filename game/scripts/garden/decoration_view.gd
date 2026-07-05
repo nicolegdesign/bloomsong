@@ -20,6 +20,7 @@ func _draw() -> void:
 	var data := ContentDB.get_decoration(pl.id)
 	if data == null:
 		return
-	var rect := Rect2(Vector2.ONE * -SIZE / 2.0, Vector2.ONE * SIZE)
+	# Bottom-anchored like all placement views (origin = cell bottom-center).
+	var rect := Rect2(Vector2(-SIZE / 2.0, -SIZE - 3.0), Vector2.ONE * SIZE)
 	draw_rect(rect, data.placeholder_color)
 	draw_rect(rect, data.placeholder_color.darkened(0.4), false, 2.0)

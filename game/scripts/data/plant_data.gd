@@ -9,6 +9,10 @@ extends Resource
 @export var days_to_mature := 3
 ## Number of visual growth stages, including the mature one.
 @export var growth_stages := 3
+## One texture per growth stage (index = stage). All stages of a plant must share
+## the same source canvas size so relative scale between stages is preserved —
+## see game/assets/PROMPTS.md §7. Empty = placeholder circle rendering.
+@export var stage_textures: Array[Texture2D] = []
 @export_flags("Spring:1", "Summer:2", "Fall:4", "Winter:8") var bloom_seasons: int = 1
 ## Soil preference: terrain ids this plant can be planted on. Currently all plants
 ## want dirt; later content can list short_grass (wildflowers), water/mud (aquatics).

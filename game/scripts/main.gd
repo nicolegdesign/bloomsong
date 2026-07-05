@@ -8,6 +8,9 @@ var player: Player
 
 
 func _ready() -> void:
+	# Root of the Y-sort chain (see Garden._ready) — lets the player character
+	# sort against garden objects for the 3/4-view depth illusion.
+	y_sort_enabled = true
 	garden = Garden.new()
 	garden.name = "Garden"
 	add_child(garden)

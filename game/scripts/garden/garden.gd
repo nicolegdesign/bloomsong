@@ -17,6 +17,11 @@ var _gifts: Array[GiftPickup] = []
 
 
 func _ready() -> void:
+	# Y-sort chain (3/4 view): things lower on screen draw in front. Combined with
+	# Main's y_sort_enabled, the player interleaves with plant/decoration views.
+	y_sort_enabled = true
+	_placements_layer.y_sort_enabled = true
+	_residents_layer.y_sort_enabled = true
 	_placements_layer.name = "Placements"
 	_residents_layer.name = "Residents"
 	add_child(_placements_layer)
@@ -189,7 +194,9 @@ func _create_view(cell: Vector2i) -> void:
 		view = PlantView.new(self, cell)
 	else:
 		view = DecorationView.new(self, cell)
-	view.position = Vector2(cell) * CELL + Vector2.ONE * CELL / 2.0
+	# Anchored at the cell's BOTTOM-center: sprites draw upward from their base,
+	# and Y-sort uses this base position — the 3/4-view convention.
+	view.position = Vector2(cell) * CELL + Vector2(CELL / 2.0, CELL)
 	_placements_layer.add_child(view)
 	_views[cell] = view
 
