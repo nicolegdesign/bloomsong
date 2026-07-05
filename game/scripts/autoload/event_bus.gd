@@ -28,6 +28,12 @@ signal item_collected(item_id: StringName, count: int)
 ## Seed/decoration stock changed (bought, planted, or refunded) — the palette and
 ## shop redraw their counts (ROADMAP 7.5).
 signal shop_stock_changed
+## A shop purchase succeeded (distinct from shop_stock_changed, which also fires
+## for placing/removing — MusicPlayer's chime should only play for the purchase).
+signal item_purchased
+## A dropped resident gift was clicked and collected (distinct from the general
+## item_collected, which also fires for ordinary fruit harvesting).
+signal treasure_collected(item_id: StringName)
 
 # Meta
 signal toast(message: String)

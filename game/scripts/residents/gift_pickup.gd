@@ -31,6 +31,7 @@ func _process(delta: float) -> void:
 ## Garden once it decides a click landed on this pickup.
 func collect() -> void:
 	PlayerData.add_item(item_id, 1)
+	EventBus.treasure_collected.emit(item_id)
 	var data := ContentDB.get_item(item_id)
 	if data != null:
 		EventBus.toast.emit("Collected: %s" % data.display_name)

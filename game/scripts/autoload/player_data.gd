@@ -196,6 +196,7 @@ func buy_seed(plant_id: StringName) -> bool:
 	if data == null or not is_unlocked(data) or not spend_money(data.seed_price):
 		return false
 	add_seed(plant_id)
+	EventBus.item_purchased.emit()
 	return true
 
 
@@ -205,6 +206,7 @@ func buy_decoration(decoration_id: StringName) -> bool:
 	if data == null or not is_unlocked(data) or not spend_money(data.price):
 		return false
 	add_decoration(decoration_id)
+	EventBus.item_purchased.emit()
 	return true
 
 
