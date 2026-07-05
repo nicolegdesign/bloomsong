@@ -53,7 +53,7 @@ func current_item() -> Resource:
 	return list[clampi(_index, 0, list.size() - 1)]
 
 
-## One line for the HUD, e.g. "[Plant] 1:Sunflower ▶2:Berry Bush 3:Oak Tree".
+## One line for the HUD, e.g. "[Plant] 1:Sunflower ▶2:Blackberry Bush 3:Oak Tree".
 func describe() -> String:
 	var parts: Array[String] = []
 	var list := current_list()

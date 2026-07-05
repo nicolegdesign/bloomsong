@@ -113,8 +113,8 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
       ✅ Test: discoveries move the bar; crossing a threshold levels up.
 - [x] **7.2 Unlock gating**: palettes only show content with `unlock_level <= level`. Start the game with ~3 things unlocked; gate the rest across levels 2–5.
       ✅ Test: new save shows the starter set; leveling reveals more.
-- [x] **7.3 Fruit & harvesting**: `FruitData` on plants (interval, item, value); mature fruiting plants show a fruit overlay on a timer; click to harvest into inventory. Author one fruiting plant (berry bush).
-      ✅ Test: berry bush sprouts berries every N days; clicking collects them.
+- [x] **7.3 Fruit & harvesting**: `FruitData` on plants (interval, item, value); mature fruiting plants show a fruit overlay on a timer; click to harvest into inventory. Author one fruiting plant (blackberry bush).
+      ✅ Test: blackberry bush sprouts berries every N days; clicking collects them.
 - [x] **7.4 Resident gifts**: residents with `leaves_behind` occasionally drop an item sparkle on despawn; click to collect.
       ✅ Test: after several robin visits, a feather appears and is collectible.
 - [x] **7.5 Money + shop v1**: sell inventory items; buy seeds/decorations (money-gated on top of level-gating). Simple two-tab shop UI.

@@ -73,10 +73,10 @@ func test_harvest_whole(t: Node) -> void:
 	var seed_cost: int = ContentDB.get_plant(&"sunflower").seed_price
 	t.check(bloom != null and bloom.sell_price > seed_cost, "bloom sells above seed price")
 	# Plants without harvest_whole_item are not cuttable.
-	m.place(GardenModel.KIND_PLANT, &"berry_bush", cell, 1)
+	m.place(GardenModel.KIND_PLANT, &"blackberry_bush", cell, 1)
 	for i in 3:
 		m.advance_day()
-	t.check_eq(m.harvest_whole(cell), &"", "berry bush is not whole-harvestable")
+	t.check_eq(m.harvest_whole(cell), &"", "blackberry bush is not whole-harvestable")
 
 
 func test_growth_to_maturity(t: Node) -> void:
@@ -101,7 +101,7 @@ func test_fruit_cycle(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
 	var cell := Vector2i(2, 2)
 	m.set_terrain(cell, &"dirt")
-	m.place(GardenModel.KIND_PLANT, &"berry_bush", cell, 1)  # mature 3d, fruit every 2d
+	m.place(GardenModel.KIND_PLANT, &"blackberry_bush", cell, 1)  # mature 3d, fruit every 2d
 	for i in 3:
 		m.advance_day()
 	t.check(m.is_mature(cell), "bush mature after 3 days")
@@ -141,7 +141,7 @@ func test_serialize_round_trip(t: Node) -> void:
 	m.set_terrain(Vector2i(0, 1), &"long_grass")
 	m.set_terrain(Vector2i(1, 1), &"water")
 	m.set_terrain(Vector2i(4, 4), &"dirt")
-	m.place(GardenModel.KIND_PLANT, &"berry_bush", Vector2i(4, 4), 3)
+	m.place(GardenModel.KIND_PLANT, &"blackberry_bush", Vector2i(4, 4), 3)
 	m.place(GardenModel.KIND_DECORATION, &"log", Vector2i(5, 5), 3)
 	for i in 4:
 		m.advance_day()

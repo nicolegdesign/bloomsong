@@ -106,7 +106,7 @@ Copy the master anchor (§2), then append:
 > Then, in the same conversation: "Now the same {sunflower}, same palette and style, as a
 > **half-grown young plant** — shorter, budding, not yet flowering." And: "Same plant as a
 > **tiny fresh sprout** — two small leaves." (Match the stage count in the plant's `.tres`:
-> sunflower 3, berry bush 3, oak 4. For fruiting plants, also ask for the mature stage
+> sunflower 3, blackberry bush 3, oak 4. For fruiting plants, also ask for the mature stage
 > **with ripe fruit visible** — that's the `fruit_ready` variant.)
 
 ### 5.3 Tree
@@ -164,6 +164,11 @@ Empty until the style board session.)*
   `content/plants/sunflower.tres`; `planted_dirt.png` is the shared day-0 mound for ALL plants.
 - **Farmer (idle):** ✅ 2026-07-05 — §5.6 template + style board. In-game via
   `scripts/player/player.gd` preload. Turnaround sheet (front/side/back) still to generate.
+- **Blackberry bush (stages 0–2 + fruiting variant):** ✅ 2026-07-05 — §5.2 template + style
+  board; same-canvas series, plus a mature **with-ripe-fruit** image per §5.2's fruit_ready
+  note. Wired in `content/plants/blackberry_bush.tres` (renamed from `berry_bush`) via
+  `stage_textures` (0–2) + the new `PlantData.fruiting_texture` override, which `PlantView`
+  swaps in whenever `fruit_ready` is true instead of the plain mature sprite.
 
 ## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 

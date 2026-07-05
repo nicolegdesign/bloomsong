@@ -33,12 +33,16 @@ func _draw() -> void:
 	var data := ContentDB.get_plant(pl.id)
 	if data == null:
 		return
-	var texture := _texture_for(pl, data)
+	var fruit_ready := bool(pl.get("fruit_ready", false))
+	var used_fruiting_texture := bool(pl.was_mature) and fruit_ready and data.fruiting_texture != null
+	var texture := data.fruiting_texture if used_fruiting_texture else _texture_for(pl, data)
 	if texture != null:
 		_draw_texture_anchored(texture)
 	else:
 		_draw_placeholder(pl, data)
-	if bool(pl.get("fruit_ready", false)):
+	# The dedicated fruiting texture already shows the fruit visually; the small
+	# red-dot indicator is just a fallback for placeholders / not-yet-arted plants.
+	if fruit_ready and not used_fruiting_texture:
 		draw_circle(Vector2(Garden.CELL * 0.3, -Garden.CELL * 0.9), 3.5, Color(0.9, 0.2, 0.25))
 
 

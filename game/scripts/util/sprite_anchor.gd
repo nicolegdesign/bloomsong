@@ -8,6 +8,11 @@ class_name SpriteAnchor
 
 ## Ignore near-invisible pixels (soft glow halos) when finding the baseline.
 const ALPHA_THRESHOLD := 0.12
+## A row only counts as visible content if at least this many pixels clear the
+## alpha threshold — filters an isolated stray artifact pixel (seen in one export,
+## a single-pixel-wide haze trailing ~60 rows below the actual artwork) that a
+## bare single-pixel check would mistake for the sprite's true base.
+const MIN_QUALIFYING_PIXELS := 2
 
 static var _cache: Dictionary = {}
 
@@ -24,10 +29,13 @@ static func bottom_margin(texture: Texture2D) -> int:
 			img.decompress()
 		var found := false
 		for y in range(img.get_height() - 1, -1, -1):
+			var qualifying := 0
 			for x in img.get_width():
 				if img.get_pixel(x, y).a > ALPHA_THRESHOLD:
-					found = true
-					break
+					qualifying += 1
+					if qualifying >= MIN_QUALIFYING_PIXELS:
+						found = true
+						break
 			if found:
 				margin = img.get_height() - 1 - y
 				break

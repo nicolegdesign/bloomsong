@@ -13,6 +13,11 @@ extends Resource
 ## the same source canvas size so relative scale between stages is preserved —
 ## see game/assets/PROMPTS.md §7. Empty = placeholder circle rendering.
 @export var stage_textures: Array[Texture2D] = []
+## Overrides the final (mature) stage_textures entry while fruit is ripe and ready
+## to harvest — e.g. a blackberry bush visibly bearing berries (PROMPTS.md §5.2's
+## "fruit_ready variant"). Empty = no visual difference; only relevant for plants
+## with a fruit_item.
+@export var fruiting_texture: Texture2D
 @export_flags("Spring:1", "Summer:2", "Fall:4", "Winter:8") var bloom_seasons: int = 1
 ## Soil preference: terrain ids this plant can be planted on. Currently all plants
 ## want dirt; later content can list short_grass (wildflowers), water/mud (aquatics).
