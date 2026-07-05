@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="DecorationData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="DecorationData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/decoration_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/decorations/log.png" id="2_tex"]
 
 [resource]
 script = ExtResource("1_script")
@@ -9,5 +10,6 @@ display_name = "Fallen Log"
 footprint = Vector2i(2, 1)
 display_box_cells = Vector2(2, 1.2)
 placeholder_color = Color(0.5, 0.36, 0.24, 1)
+texture = ExtResource("2_tex")
 price = 10
 unlock_level = 4

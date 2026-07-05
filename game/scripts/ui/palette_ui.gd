@@ -7,6 +7,10 @@ extends Control
 
 const BAR_HEIGHT := 78.0
 const TAB_HEIGHT := 26.0
+const ICON_MAX_WIDTH := 24
+## Every plant shows this generic packet, not its own grown-plant art — you're
+## selecting a seed to plant, not the finished flower (matches the shop's Buy tab).
+const SEED_ICON := preload("res://assets/art/icons/seed.png")
 
 var build: BuildController
 
@@ -71,6 +75,8 @@ func _rebuild() -> void:
 		var stock := _stock_for(data)
 		var b := Button.new()
 		b.text = "%s  ×%d" % [data.display_name, stock] if stock >= 0 else "%s" % data.display_name
+		b.icon = _icon_for(data)
+		b.add_theme_constant_override("icon_max_width", ICON_MAX_WIDTH)
 		b.custom_minimum_size = Vector2(96, 40)
 		b.toggle_mode = true
 		b.button_pressed = (i == selected)
@@ -89,6 +95,14 @@ func _rebuild() -> void:
 		empty.text = "Nothing unlocked yet."
 		empty.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 		_items_row.add_child(empty)
+
+
+## The generic seed packet for plants; the item's own world texture (tile or
+## decoration sprite) otherwise. Null falls back to no icon (just the label).
+func _icon_for(data: Resource) -> Texture2D:
+	if build.mode() == BuildController.Mode.PLANT:
+		return SEED_ICON
+	return data.texture if "texture" in data else null
 
 
 ## Purchased stock remaining for a plant/decoration, or -1 in terrain mode (which

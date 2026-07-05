@@ -187,6 +187,17 @@ Empty until the style board session.)*
   or baseline anchoring needed — a tileable texture just fills its cell edge-to-edge). Falls
   back to the flat `placeholder_color` rect when a terrain has no texture, same pattern as
   every other content type.
+- **Fallen log:** ✅ 2026-07-05 — §5.4 template (wide decoration), style board. Wired in
+  `content/decorations/log.tres`, which already had its 2×1 footprint/display box set up.
+- **Item icons (berry, feather, sunflower bloom) + generic seed packet:** ✅ 2026-07-05 —
+  §5.7 template. First icon art, so `ItemData` gained an `icon` field, used in the shop's
+  Sell tab and anywhere inventory is listed. Plants don't get a per-plant icon — the shop's
+  Buy tab and the palette's Plant mode both show one shared `assets/art/icons/seed.png`
+  packet instead (you're buying/selecting a seed, not the grown plant), while Decoration/
+  Terrain rows reuse each item's own world texture as its icon. `Button.icon` (with an
+  `icon_max_width` theme override, since Godot doesn't auto-scale it) handles the palette;
+  the shop uses a small shared `_make_icon()` helper building a TextureRect or a
+  placeholder-color ColorRect fallback.
 
 ## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 

@@ -10,6 +10,10 @@ extends CanvasLayer
 enum Tab { BUY, SELL }
 
 const PANEL_SIZE := Vector2(640, 520)
+const ICON_SIZE := 28.0
+## Every plant shows this generic packet in the shop, not its own grown-plant art —
+## you're buying a seed, not the finished flower (PROMPTS.md's icon convention).
+const SEED_ICON := preload("res://assets/art/icons/seed.png")
 
 var _tab: Tab = Tab.BUY
 var _root := Control.new()
@@ -129,10 +133,8 @@ func _build_buy_rows() -> void:
 				.get(data.id, 0))
 
 		var row := HBoxContainer.new()
-		var swatch := ColorRect.new()
-		swatch.color = data.placeholder_color
-		swatch.custom_minimum_size = Vector2(24, 24)
-		row.add_child(swatch)
+		var icon_tex: Texture2D = SEED_ICON if is_plant else data.texture
+		row.add_child(_make_icon(icon_tex, data.placeholder_color))
 		var name_label := Label.new()
 		name_label.text = data.display_name
 		name_label.custom_minimum_size = Vector2(220, 0)
@@ -174,6 +176,7 @@ func _build_sell_rows() -> void:
 			continue
 		var count: int = PlayerData.inventory[id]
 		var row := HBoxContainer.new()
+		row.add_child(_make_icon(data.icon, data.placeholder_color))
 		var name_label := Label.new()
 		name_label.text = "%s ×%d" % [data.display_name, count]
 		name_label.custom_minimum_size = Vector2(260, 0)
@@ -197,6 +200,22 @@ func _on_sell_item(id: StringName) -> void:
 func _on_sell_all() -> void:
 	PlayerData.sell_all()
 	_refresh()
+
+
+## A small icon Control for a row: the texture aspect-fit into a fixed square if
+## present, otherwise a flat color swatch — same fallback pattern as every view.
+func _make_icon(texture: Texture2D, fallback_color: Color) -> Control:
+	if texture == null:
+		var swatch := ColorRect.new()
+		swatch.color = fallback_color
+		swatch.custom_minimum_size = Vector2.ONE * ICON_SIZE
+		return swatch
+	var rect := TextureRect.new()
+	rect.texture = texture
+	rect.custom_minimum_size = Vector2.ONE * ICON_SIZE
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	return rect
 
 
 func _add_note(text: String) -> void:

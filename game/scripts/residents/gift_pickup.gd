@@ -7,6 +7,7 @@ extends Node2D
 const PICKUP_RADIUS := 40.0
 const BOB_AMPLITUDE := 6.0
 const BOB_SPEED := 2.5
+const ICON_SIZE := Vector2(28.0, 28.0)
 
 var item_id: StringName
 
@@ -38,6 +39,9 @@ func collect() -> void:
 
 func _draw() -> void:
 	var data := ContentDB.get_item(item_id)
+	if data != null and data.icon != null:
+		SpriteAnchor.draw_fitted(self, data.icon, ICON_SIZE, true)
+		return
 	var color: Color = data.placeholder_color if data != null else Color.YELLOW
 	draw_circle(Vector2.ZERO, 6.0, color)
 	draw_arc(Vector2.ZERO, 9.0, 0, TAU, 16, Color(1, 1, 0.6, 0.85), 1.5)
