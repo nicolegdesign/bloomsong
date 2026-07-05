@@ -109,17 +109,17 @@ Conventions used below: "test scene" = a minimal `.tscn` under `tests/scenes/` t
 ## Phase 7 — Progression & Economy
 *Goal: XP, levels, unlocks, money — the reward loop closes.*
 
-- [ ] **7.1 XP + levels**: `PlayerData` grants XP for plant matured / resident discovered / diary page completed; level curve in a single `.tres`. HUD XP bar; level-up banner listing unlocks.
+- [x] **7.1 XP + levels**: `PlayerData` grants XP for plant matured / resident discovered / diary page completed; level curve in a single `.tres`. HUD XP bar; level-up banner listing unlocks.
       ✅ Test: discoveries move the bar; crossing a threshold levels up.
-- [ ] **7.2 Unlock gating**: palettes only show content with `unlock_level <= level`. Start the game with ~3 things unlocked; gate the rest across levels 2–5.
+- [x] **7.2 Unlock gating**: palettes only show content with `unlock_level <= level`. Start the game with ~3 things unlocked; gate the rest across levels 2–5.
       ✅ Test: new save shows the starter set; leveling reveals more.
 - [x] **7.3 Fruit & harvesting**: `FruitData` on plants (interval, item, value); mature fruiting plants show a fruit overlay on a timer; click to harvest into inventory. Author one fruiting plant (berry bush).
       ✅ Test: berry bush sprouts berries every N days; clicking collects them.
-- [ ] **7.4 Resident gifts**: residents with `leaves_behind` occasionally drop an item sparkle on despawn; click to collect.
+- [x] **7.4 Resident gifts**: residents with `leaves_behind` occasionally drop an item sparkle on despawn; click to collect.
       ✅ Test: after several robin visits, a feather appears and is collectible.
-- [ ] **7.5 Money + shop v1**: sell inventory items; buy seeds/decorations (money-gated on top of level-gating). Simple two-tab shop UI.
+- [x] **7.5 Money + shop v1**: sell inventory items; buy seeds/decorations (money-gated on top of level-gating). Simple two-tab shop UI.
       ✅ Test: sell berries, buy a bird bath with the proceeds.
-- [ ] **7.6 All of Phase 6–7 persists** (inventory, money, xp, level, diary).
+- [x] **7.6 All of Phase 6–7 persists** (inventory, money, xp, level, diary).
       ✅ Test: full loop, reload, everything intact.
 
 ## Phase 8 — Vertical Slice Polish 🎉

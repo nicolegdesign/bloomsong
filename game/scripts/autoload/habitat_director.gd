@@ -76,15 +76,15 @@ func _spawn(data: ResidentData) -> void:
 
 
 func _despawn(id: StringName) -> void:
-	var view: Node = _active[id]
+	var view: Node2D = _active[id]
 	_active.erase(id)
 	var data := ContentDB.get_resident(id)
-	# Departing residents sometimes leave a small gift (PLAN.md §7 economy).
-	if data != null and data.leaves_behind != &"" and _rng.randf() < data.gift_chance:
-		PlayerData.add_item(data.leaves_behind, 1)
-		var item := ContentDB.get_item(data.leaves_behind)
-		if item != null:
-			EventBus.toast.emit("%s left behind: %s" % [data.display_name, item.display_name])
+	# Departing residents sometimes leave a small gift (PLAN.md §7 economy) — a
+	# sparkle left where they were standing, not an instant inventory teleport
+	# (ROADMAP 7.4).
+	if data != null and data.leaves_behind != &"" and _rng.randf() < data.gift_chance \
+			and is_instance_valid(view):
+		_garden.add_gift(GiftPickup.new(data.leaves_behind, view.global_position))
 	if is_instance_valid(view):
 		view.queue_free()
 	EventBus.resident_despawned.emit(id)

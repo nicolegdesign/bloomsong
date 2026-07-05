@@ -17,4 +17,7 @@ extends Resource
 @export var placeholder_color: Color = Color.WHITE
 @export var unlock_level := 1
 @export var seed_price := 5
-@export var xp_on_mature := 10
+## Granted immediately on planting (ROADMAP 7.1 pacing) — xp_on_mature is separate,
+## granted later when it finishes growing.
+@export var xp_on_plant := 5
+@export var xp_on_mature := 20

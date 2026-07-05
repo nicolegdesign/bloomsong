@@ -24,7 +24,7 @@ const BEHAVIOR_EAT := 4
 ## Item occasionally left behind when leaving (empty = none).
 @export var leaves_behind: StringName
 @export_range(0.0, 1.0) var gift_chance := 0.15
-@export var xp_on_discovery := 25
+@export var xp_on_discovery := 40
 
 
 ## Season/weather/time gate — cheap check done before evaluating requirements.

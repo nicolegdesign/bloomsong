@@ -13,4 +13,4 @@ requirements = []
 active_times = 15
 active_seasons = 15
 weather_needed = 4
-xp_on_discovery = 15
+xp_on_discovery = 25

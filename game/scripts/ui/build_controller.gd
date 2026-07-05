@@ -71,9 +71,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				select_index(event.physical_keycode - KEY_1)
 	elif event is InputEventMouseButton and event.pressed:
-		var cell := garden.cell_at(garden.get_global_mouse_position())
+		var world_pos := garden.get_global_mouse_position()
+		var cell := garden.cell_at(world_pos)
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			_apply(cell)
+			if not garden.collect_gift(world_pos):
+				_apply(cell)
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			garden.remove(cell)
 

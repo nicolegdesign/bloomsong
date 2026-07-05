@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="LevelCurveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/level_curve_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+xp_thresholds = Array[int]([100, 200, 300, 400, 500])

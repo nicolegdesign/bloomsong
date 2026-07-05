@@ -50,27 +50,37 @@ func _ready() -> void:
 	build.selection_changed.connect(_rebuild)
 	EventBus.level_up.connect(func(_l: int, _u: Array) -> void: _rebuild())
 	EventBus.game_loaded.connect(_rebuild)
+	EventBus.shop_stock_changed.connect(_rebuild)
 	_rebuild()
 
 
 func _rebuild() -> void:
 	for i in _tab_buttons.size():
 		_tab_buttons[i].button_pressed = (i == build.mode())
-	for b in _item_buttons:
-		b.queue_free()
+	# Clear every child directly (not just tracked buttons) — the empty-mode
+	# label below isn't a Button, so it'd otherwise never get cleaned up and
+	# would pile up one copy per rebuild.
+	for child in _items_row.get_children():
+		child.queue_free()
 	_item_buttons.clear()
 
 	var list := build.current_list()
 	var selected := clampi(build.index(), 0, maxi(list.size() - 1, 0))
 	for i in list.size():
 		var data: Resource = list[i]
+		var stock := _stock_for(data)
 		var b := Button.new()
-		b.text = "%s" % data.display_name
+		b.text = "%s  ×%d" % [data.display_name, stock] if stock >= 0 else "%s" % data.display_name
 		b.custom_minimum_size = Vector2(96, 40)
 		b.toggle_mode = true
 		b.button_pressed = (i == selected)
 		var color: Color = data.placeholder_color if "placeholder_color" in data else Color.WHITE
-		b.modulate = color.lightened(0.5) if b.button_pressed else Color.WHITE
+		if stock == 0:
+			b.modulate = Color(1, 1, 1, 0.5)  # out of stock — hint to visit the shop
+		elif b.button_pressed:
+			b.modulate = color.lightened(0.5)
+		else:
+			b.modulate = Color.WHITE
 		b.pressed.connect(build.select_index.bind(i))
 		_items_row.add_child(b)
 		_item_buttons.append(b)
@@ -79,3 +89,15 @@ func _rebuild() -> void:
 		empty.text = "Nothing unlocked yet."
 		empty.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 		_items_row.add_child(empty)
+
+
+## Purchased stock remaining for a plant/decoration, or -1 in terrain mode (which
+## has no stock concept — terrain painting stays free).
+func _stock_for(data: Resource) -> int:
+	match build.mode():
+		BuildController.Mode.PLANT:
+			return int(PlayerData.seed_stock.get(data.id, 0))
+		BuildController.Mode.DECORATION:
+			return int(PlayerData.decoration_stock.get(data.id, 0))
+		_:
+			return -1

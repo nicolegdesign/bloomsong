@@ -4,20 +4,24 @@ extends Node
 
 var xp := 0            # progress within the current level
 var level := 1
-var money := 50
+var money := 100
 ## resident_id (StringName) -> { "times_seen": int, "first_seen_day": int }
 var diary: Dictionary = {}
 ## plant_id (StringName) -> times grown to maturity
 var plants_grown: Dictionary = {}
 ## item_id (StringName) -> count
 var inventory: Dictionary = {}
+## Seeds/decorations bought from the shop but not yet placed (ROADMAP 7.5) —
+## placing a plant or decoration draws from here instead of being free.
+## plant_id / decoration_id (StringName) -> count.
+var seed_stock: Dictionary = {}
+var decoration_stock: Dictionary = {}
 ## Character appearance ids (Phase 13 character creation; saved from day one).
 var appearance: Dictionary = {}
 
 
-## TODO Phase 7: move the curve into a content .tres.
 func xp_to_next() -> int:
-	return 100 * level
+	return ContentDB.level_curve.xp_to_next(level)
 
 
 func add_xp(amount: int) -> void:
@@ -60,7 +64,7 @@ func record_sighting(resident_id: StringName) -> bool:
 	_bump(entry.time_counts, Clock.time_of_day())
 	if is_new:
 		var data := ContentDB.get_resident(resident_id)
-		add_xp(data.xp_on_discovery if data != null else 10)
+		add_xp(data.xp_on_discovery if data != null else 40)
 	return is_new
 
 
@@ -103,10 +107,17 @@ func favorite_time(resident_id: StringName) -> int:
 	return _favorite(resident_id, "time_counts")
 
 
+## Small immediate XP for the act of planting (ROADMAP 7.1 pacing) — separate from
+## the bigger reward for actually growing it to maturity.
+func record_plant_planted(plant_id: StringName) -> void:
+	var data := ContentDB.get_plant(plant_id)
+	add_xp(data.xp_on_plant if data != null else 5)
+
+
 func record_plant_matured(plant_id: StringName) -> void:
 	plants_grown[plant_id] = int(plants_grown.get(plant_id, 0)) + 1
 	var data := ContentDB.get_plant(plant_id)
-	add_xp(data.xp_on_mature if data != null else 5)
+	add_xp(data.xp_on_mature if data != null else 20)
 
 
 func add_item(item_id: StringName, count := 1) -> void:
@@ -114,7 +125,7 @@ func add_item(item_id: StringName, count := 1) -> void:
 	EventBus.item_collected.emit(item_id, count)
 
 
-## Sells the whole inventory (placeholder for the Phase 7 shop UI). Returns money earned.
+## Sells the whole inventory. Returns money earned.
 func sell_all() -> int:
 	var earned := 0
 	for item_id: StringName in inventory:
@@ -125,6 +136,76 @@ func sell_all() -> int:
 	if earned > 0:
 		add_money(earned)
 	return earned
+
+
+## Sells every unit of one item stack (ROADMAP 7.5 shop). Returns money earned.
+func sell_item(item_id: StringName) -> int:
+	var count := int(inventory.get(item_id, 0))
+	if count <= 0:
+		return 0
+	var data := ContentDB.get_item(item_id)
+	var earned := data.sell_price * count if data != null else 0
+	inventory.erase(item_id)
+	if earned > 0:
+		add_money(earned)
+	return earned
+
+
+func has_seed(plant_id: StringName) -> bool:
+	return int(seed_stock.get(plant_id, 0)) > 0
+
+
+func has_decoration(decoration_id: StringName) -> bool:
+	return int(decoration_stock.get(decoration_id, 0)) > 0
+
+
+## Adds to stock without charging money — used by buy_seed() and by Garden's
+## remove() refund (removing a placed plant/decoration gives it back, not a fail
+## state per PLAN.md §8).
+func add_seed(plant_id: StringName, count := 1) -> void:
+	seed_stock[plant_id] = int(seed_stock.get(plant_id, 0)) + count
+	EventBus.shop_stock_changed.emit()
+
+
+func add_decoration(decoration_id: StringName, count := 1) -> void:
+	decoration_stock[decoration_id] = int(decoration_stock.get(decoration_id, 0)) + count
+	EventBus.shop_stock_changed.emit()
+
+
+func consume_seed(plant_id: StringName) -> void:
+	_decrement(seed_stock, plant_id)
+	EventBus.shop_stock_changed.emit()
+
+
+func consume_decoration(decoration_id: StringName) -> void:
+	_decrement(decoration_stock, decoration_id)
+	EventBus.shop_stock_changed.emit()
+
+
+func _decrement(stock: Dictionary, id: StringName) -> void:
+	var left := int(stock.get(id, 0)) - 1
+	if left > 0:
+		stock[id] = left
+	else:
+		stock.erase(id)
+
+
+## Buys one seed packet from the shop (ROADMAP 7.5). False if locked or unaffordable.
+func buy_seed(plant_id: StringName) -> bool:
+	var data := ContentDB.get_plant(plant_id)
+	if data == null or not is_unlocked(data) or not spend_money(data.seed_price):
+		return false
+	add_seed(plant_id)
+	return true
+
+
+## Buys one decoration from the shop. False if locked or unaffordable.
+func buy_decoration(decoration_id: StringName) -> bool:
+	var data := ContentDB.get_decoration(decoration_id)
+	if data == null or not is_unlocked(data) or not spend_money(data.price):
+		return false
+	add_decoration(decoration_id)
+	return true
 
 
 func is_unlocked(data: Resource) -> bool:
@@ -156,16 +237,23 @@ func serialize() -> Dictionary:
 	var inv_out: Dictionary = {}
 	for id: StringName in inventory:
 		inv_out[String(id)] = inventory[id]
+	var seed_stock_out: Dictionary = {}
+	for id: StringName in seed_stock:
+		seed_stock_out[String(id)] = seed_stock[id]
+	var deco_stock_out: Dictionary = {}
+	for id: StringName in decoration_stock:
+		deco_stock_out[String(id)] = decoration_stock[id]
 	return {
 		"xp": xp, "level": level, "money": money, "appearance": appearance,
 		"diary": diary_out, "plants_grown": grown_out, "inventory": inv_out,
+		"seed_stock": seed_stock_out, "decoration_stock": deco_stock_out,
 	}
 
 
 func deserialize(d: Dictionary) -> void:
 	xp = int(d.get("xp", 0))
 	level = int(d.get("level", 1))
-	money = int(d.get("money", 50))
+	money = int(d.get("money", 100))
 	appearance = d.get("appearance", {})
 	diary.clear()
 	for id: String in d.get("diary", {}):
@@ -183,5 +271,12 @@ func deserialize(d: Dictionary) -> void:
 	inventory.clear()
 	for id: String in d.get("inventory", {}):
 		inventory[StringName(id)] = int(d.inventory[id])
+	seed_stock.clear()
+	for id: String in d.get("seed_stock", {}):
+		seed_stock[StringName(id)] = int(d.seed_stock[id])
+	decoration_stock.clear()
+	for id: String in d.get("decoration_stock", {}):
+		decoration_stock[StringName(id)] = int(d.decoration_stock[id])
 	EventBus.xp_changed.emit(xp, level)
 	EventBus.money_changed.emit(money)
+	EventBus.shop_stock_changed.emit()

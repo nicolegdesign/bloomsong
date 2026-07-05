@@ -8,4 +8,4 @@ id = &"bird_bath"
 display_name = "Bird Bath"
 placeholder_color = Color(0.75, 0.8, 0.85, 1)
 price = 40
-unlock_level = 1
+unlock_level = 3

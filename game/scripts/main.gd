@@ -50,6 +50,10 @@ func _ready() -> void:
 	diary.name = "DiaryUI"
 	add_child(diary)
 
+	var shop := ShopUI.new()
+	shop.name = "ShopUI"
+	add_child(shop)
+
 	if SaveManager.load_game():
 		EventBus.toast.emit("Welcome back to your garden 🌱")
 	else:
@@ -63,10 +67,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_N:
 			Clock.skip_to_next_day()
 			EventBus.toast.emit("Day %d begins." % Clock.day)
-		KEY_B:
-			var earned := PlayerData.sell_all()
-			EventBus.toast.emit("Sold produce for %d coins." % earned if earned > 0
-					else "Nothing to sell.")
 		KEY_F9:
 			if SaveManager.save_game():
 				EventBus.toast.emit("Game saved.")

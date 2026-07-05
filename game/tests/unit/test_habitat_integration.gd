@@ -11,7 +11,9 @@ func test_full_discovery_flow(t: Node) -> void:
 	var garden := Garden.new()
 	t.add_child(garden)  # _ready registers it with HabitatDirector/SaveManager
 
-	# Build the butterfly habitat: 3 sunflowers, grown to bloom.
+	# Build the butterfly habitat: 3 sunflowers, grown to bloom. Garden.place() now
+	# draws from purchased stock (ROADMAP 7.5), so stock up first.
+	PlayerData.add_seed(&"sunflower", 3)
 	for i in 3:
 		t.check(garden.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(i, 0)),
 				"sunflower %d planted" % i)
@@ -41,6 +43,35 @@ func test_full_discovery_flow(t: Node) -> void:
 	t.check(PlayerData.diary.has(&"snail"), "snail discovered in the rain (no other needs)")
 
 	# Cleanup so later tests/sessions are unaffected.
+	HabitatDirector.reset()
+	HabitatDirector._garden = null
+	SaveManager._garden = null
+	garden.queue_free()
+	PlayerData.deserialize(player_snapshot)
+
+
+## ROADMAP 7.4: despawning with a successful gift roll drops a GiftPickup in the
+## garden at the resident's spot, instead of teleporting the item into inventory.
+func test_despawn_drops_gift_pickup_not_instant_item(t: Node) -> void:
+	var player_snapshot := PlayerData.serialize()
+	PlayerData.deserialize({})
+
+	var robin := ContentDB.get_resident(&"robin")
+	var original_gift_chance := robin.gift_chance
+	robin.gift_chance = 1.0  # force the drop deterministically for this test
+
+	var garden := Garden.new()
+	t.add_child(garden)
+
+	HabitatDirector._spawn(robin)
+	t.check(HabitatDirector._active.has(&"robin"), "robin is active after spawning")
+	HabitatDirector._despawn(&"robin")
+
+	t.check(PlayerData.inventory.is_empty(), "the feather is not instantly in the inventory")
+	t.check_eq(garden._gifts.size(), 1, "a gift pickup was placed in the garden instead")
+	t.check_eq(garden._gifts[0].item_id, &"feather", "it's the resident's leaves_behind item")
+
+	robin.gift_chance = original_gift_chance
 	HabitatDirector.reset()
 	HabitatDirector._garden = null
 	SaveManager._garden = null

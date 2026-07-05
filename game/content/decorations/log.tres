@@ -8,4 +8,4 @@ id = &"log"
 display_name = "Fallen Log"
 placeholder_color = Color(0.5, 0.36, 0.24, 1)
 price = 10
-unlock_level = 1
+unlock_level = 4

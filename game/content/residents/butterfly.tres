@@ -22,4 +22,4 @@ behaviors = 5
 active_times = 3
 active_seasons = 15
 weather_needed = 1
-xp_on_discovery = 25
+xp_on_discovery = 40

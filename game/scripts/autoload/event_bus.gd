@@ -25,9 +25,13 @@ signal xp_changed(xp: int, level: int)
 signal level_up(level: int, unlocked_names: Array)
 signal money_changed(money: int)
 signal item_collected(item_id: StringName, count: int)
+## Seed/decoration stock changed (bought, planted, or refunded) — the palette and
+## shop redraw their counts (ROADMAP 7.5).
+signal shop_stock_changed
 
 # Meta
 signal toast(message: String)
 signal game_loaded
 signal game_saved
 signal toggle_diary
+signal toggle_shop

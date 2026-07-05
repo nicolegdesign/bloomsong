@@ -13,6 +13,7 @@ var _views: Dictionary = {}  # cell (Vector2i) -> Node2D view
 var _placements_layer := Node2D.new()
 var _residents_layer := Node2D.new()
 var _hover_cell := Vector2i(-999, -999)
+var _gifts: Array[GiftPickup] = []
 
 
 func _ready() -> void:
@@ -59,17 +60,37 @@ func set_terrain(id: StringName, cell: Vector2i) -> bool:
 	return true
 
 
+## Plants/decorations must be bought from the shop first (ROADMAP 7.5) — this
+## draws one unit from PlayerData's purchased stock. Terrain stays free.
 func place(kind: StringName, id: StringName, cell: Vector2i) -> bool:
+	if kind == GardenModel.KIND_PLANT and not PlayerData.has_seed(id):
+		EventBus.toast.emit("No seeds in stock — visit the shop.")
+		return false
+	if kind == GardenModel.KIND_DECORATION and not PlayerData.has_decoration(id):
+		EventBus.toast.emit("None in stock — visit the shop.")
+		return false
 	if not model.place(kind, id, cell, Clock.day):
 		return false
+	if kind == GardenModel.KIND_PLANT:
+		PlayerData.consume_seed(id)
+		PlayerData.record_plant_planted(id)
+	elif kind == GardenModel.KIND_DECORATION:
+		PlayerData.consume_decoration(id)
 	_create_view(cell)
 	EventBus.placement_changed.emit(cell)
 	return true
 
 
+## Refunds the removed plant/decoration back to purchased stock — removing a
+## mistake is never punished (PLAN.md §8: "removal refunds partially or fully").
 func remove(cell: Vector2i) -> bool:
-	if model.remove(cell).is_empty():
+	var removed := model.remove(cell)
+	if removed.is_empty():
 		return false
+	if removed.kind == GardenModel.KIND_PLANT:
+		PlayerData.add_seed(removed.id)
+	elif removed.kind == GardenModel.KIND_DECORATION:
+		PlayerData.add_decoration(removed.id)
 	_free_view(cell)
 	EventBus.placement_changed.emit(cell)
 	return true
@@ -90,6 +111,27 @@ func harvest(cell: Vector2i) -> bool:
 
 func add_resident_view(view: Node2D) -> void:
 	_residents_layer.add_child(view)
+
+
+## Places a dropped gift in the world (ROADMAP 7.4). Sits until collect_gift()
+## finds a click near it.
+func add_gift(pickup: GiftPickup) -> void:
+	_residents_layer.add_child(pickup)
+	_gifts.append(pickup)
+
+
+## Collects the nearest gift within pickup radius of world_pos, if any. Returns
+## true if something was collected (so the caller doesn't also try to place/
+## harvest at the clicked cell).
+func collect_gift(world_pos: Vector2) -> bool:
+	for pickup in _gifts:
+		if not is_instance_valid(pickup):
+			continue
+		if pickup.global_position.distance_to(world_pos) <= GiftPickup.PICKUP_RADIUS:
+			_gifts.erase(pickup)
+			pickup.collect()
+			return true
+	return false
 
 
 # --- Simulation --------------------------------------------------------------
@@ -113,6 +155,12 @@ func load_model(new_model: GardenModel) -> void:
 		_free_view(cell)
 	for cell: Vector2i in model.placements:
 		_create_view(cell)
+	# Uncollected gifts are momentary/cosmetic like resident positions (ROADMAP
+	# 5.6) — they don't survive a reload, only what's already in the inventory does.
+	for pickup in _gifts:
+		if is_instance_valid(pickup):
+			pickup.queue_free()
+	_gifts.clear()
 	queue_redraw()
 
 

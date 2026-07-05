@@ -7,6 +7,9 @@ var plants: Dictionary = {}       # id -> PlantData
 var decorations: Dictionary = {}  # id -> DecorationData
 var residents: Dictionary = {}    # id -> ResidentData
 var items: Dictionary = {}        # id -> ItemData
+## The XP curve (ROADMAP 7.1) — a single resource, not a folder of many, since
+## there's only one progression curve for the whole game.
+var level_curve: LevelCurveData
 
 
 func _ready() -> void:
@@ -15,6 +18,7 @@ func _ready() -> void:
 	_load_dir("res://content/decorations", decorations)
 	_load_dir("res://content/residents", residents)
 	_load_dir("res://content/items", items)
+	level_curve = load("res://content/progression/level_curve.tres") as LevelCurveData
 	print("ContentDB: %d terrain, %d plants, %d decorations, %d residents, %d items"
 			% [terrain.size(), plants.size(), decorations.size(), residents.size(), items.size()])
 

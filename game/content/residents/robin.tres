@@ -30,4 +30,4 @@ active_seasons = 15
 weather_needed = 0
 leaves_behind = &"feather"
 gift_chance = 0.25
-xp_on_discovery = 25
+xp_on_discovery = 40

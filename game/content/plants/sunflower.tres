@@ -13,4 +13,5 @@ bloom_seasons = 3
 placeholder_color = Color(0.98, 0.79, 0.2, 1)
 unlock_level = 1
 seed_price = 5
-xp_on_mature = 10
+xp_on_plant = 5
+xp_on_mature = 20

@@ -8,4 +8,4 @@ id = &"water"
 display_name = "Water"
 placeholder_color = Color(0.353, 0.706, 0.839, 1)
 plantable = false
-unlock_level = 2
+unlock_level = 5
