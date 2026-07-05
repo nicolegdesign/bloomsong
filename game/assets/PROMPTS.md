@@ -8,7 +8,7 @@ better in-game than fifteen gorgeous images in fifteen styles.
 
 ## 1. The look (say this the same way every time)
 
-- **Storybook / hand-painted gouache**, warm saturated colors, soft edges, gentle outlines,
+- **Storybook / hand-painted gouache**, balanced, natural color palette with neutral whites (no warm yellow tint), rich greens, soft edges, gentle outlines,
   rounded friendly shapes. Inspired by *Legend of Mana* and modern cozy indie games.
   No pixel art. No photorealism. No hard black outlines.
 - **Three-quarter (3/4) view**: seen from about 35° above — the ground plane is slightly
@@ -17,15 +17,15 @@ better in-game than fifteen gorgeous images in fifteen styles.
 - **Clean readable silhouette** — each object must be identifiable from shape alone.
 - Objects sit on a **fully transparent background** with a **subtle soft oval contact
   shadow** baked in beneath them (this grounds them on the terrain for free).
+- **Minimal bases.** Plants grow from a small rounded soil mound; trees and decorations get
+  at most a tiny grass tuft. No flowers, lavender, acorns, or props at the base — the player
+  places objects on any terrain, so baked-in scenery would clash (grass tufts on a dirt
+  path, lavender sprigs on sand). The style board's decorated bases are fine as a style
+  reference, but production assets should be cleaner.
 
 ## 2. Master style anchor — paste this at the top of EVERY prompt
 
-> Storybook illustration for a cozy gardening game: soft hand-painted gouache texture,
-> warm saturated colors, gentle colored outlines, rounded shapes, clean readable
-> silhouette. Three-quarter view seen from about 35 degrees above, so the object shows
-> its front and sides plus a hint of its top. Single object only, centered, on a fully
-> transparent background (PNG with alpha). Subtle soft oval shadow directly beneath the
-> object. No text, no watermark, no border, no background scenery.
+> Storybook illustration for a cozy gardening game. Soft hand-painted gouache texture with   visible brushstrokes. Simplified, stylized shapes with clean readable silhouettes and minimal surface detail. Balanced, natural color palette with neutral whites (no warm yellow tint), rich greens, and vibrant flowers. Gentle colored linework instead of black outlines. rounded shapes, clean readable silhouette. Three-quarter view seen from about 35 degrees above, so the object shows its front and sides plus a hint of its top. Single object only, centered, on a fully transparent background (PNG with alpha). Subtle soft oval shadow directly beneath the object. No text, no watermark, no border, no background scenery.
 
 (Exception: **terrain tiles** — see §5.1 — are seamless opaque squares, not transparent objects.)
 
@@ -121,7 +121,17 @@ Copy the master anchor (§2), then append:
 > …master anchor… A **friendly gardener character**: {description from character design —
 > e.g. sun hat, overalls, boots}, standing relaxed, drawn mostly front-facing so the face is
 > clearly visible, with the slight downward camera tilt of the three-quarter view. Feet at
-> bottom-center. Simplified cozy proportions (about 3 heads tall).
+> bottom-center. Simplified cozy proportions (about 3 heads tall). Empty hands (tools are
+> separate assets).
+
+**Animation strategy:** the vertical slice needs only ONE idle sprite — movement feel comes
+from a small code-driven bob/sway while walking (part of task 8.2), which reads charmingly
+at this size. Don't attempt AI-generated frame-by-frame walk cycles yet; image models can't
+keep a character consistent across frames. When directional sprites matter (post-slice),
+generate a **turnaround sheet** — "the same character in the same pose seen from the front,
+from the side, and from behind, side by side in one image" — front + back + one side
+(mirror the side in Godot for the other direction). Worth generating the turnaround now
+while the style chat is warm, even though the game won't use it yet.
 
 ### 5.7 Item icon
 > …master anchor… A small pile of **{three ripe red berries}** as a collectible item icon,
@@ -137,7 +147,10 @@ Copy the master anchor (§2), then append:
 *(Paste the exact winning prompt + tool + date under each asset as art gets approved.
 Empty until the style board session.)*
 
-- **Style board:** —
+- **Style board:** ✅ approved 2026-07-05 — `assets/art/_source/styleboard.png`. Attach this
+  image to every asset-generation session with "match this style exactly." Character canon:
+  girl gardener, wide straw hat with daisy, brown braid, white shirt, green overalls, yellow
+  neckerchief, brown gloves and boots.
 
 ## 7. Importing into Godot (beginner steps)
 
