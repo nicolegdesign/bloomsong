@@ -4,8 +4,8 @@ extends Node2D
 ## and sparkle until the player clicks it, instead of teleporting straight into
 ## the inventory. Purely cosmetic until collected — never affects the grid.
 
-const PICKUP_RADIUS := 20.0
-const BOB_AMPLITUDE := 3.0
+const PICKUP_RADIUS := 40.0
+const BOB_AMPLITUDE := 6.0
 const BOB_SPEED := 2.5
 
 var item_id: StringName

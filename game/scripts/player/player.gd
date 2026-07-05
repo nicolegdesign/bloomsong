@@ -4,7 +4,7 @@ extends Node2D
 ## clamped to the garden; the camera follows. Placeholder visual until the art pass.
 ## Asks Garden to act (via BuildController); never mutates the grid itself.
 
-const SPEED := 150.0
+const SPEED := 300.0  # world px/sec — scaled with Garden.CELL
 const FARMER_TEXTURE := preload("res://assets/art/player/farmer.png")
 ## Display box in cells (art spec: character 64×96 at 64 px cells → 1 × 1.5).
 const BOX_CELLS := Vector2(1.0, 1.5)
@@ -41,8 +41,10 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	# The farmer sprite, aspect-fit into the display box, feet at the origin.
+	# The farmer sprite, aspect-fit into the display box, feet at the origin —
+	# baseline-anchored like all sprites (see SpriteAnchor).
 	var box := BOX_CELLS * Garden.CELL
 	var s := minf(box.x / FARMER_TEXTURE.get_width(), box.y / FARMER_TEXTURE.get_height())
 	var size := Vector2(FARMER_TEXTURE.get_width(), FARMER_TEXTURE.get_height()) * s
-	draw_texture_rect(FARMER_TEXTURE, Rect2(Vector2(-size.x / 2.0, -size.y), size), false)
+	var baseline := SpriteAnchor.bottom_margin(FARMER_TEXTURE) * s
+	draw_texture_rect(FARMER_TEXTURE, Rect2(Vector2(-size.x / 2.0, -size.y + baseline), size), false)

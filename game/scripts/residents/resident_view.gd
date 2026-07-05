@@ -6,15 +6,15 @@ extends Node2D
 ## Placeholder visual: a colored circle with an outline; rest/eat show as a gentle
 ## bob in place until real sprite animations exist.
 
-const WANDER_RADIUS := 72.0
-const RADIUS := 7.0
+const WANDER_RADIUS := 144.0
+const RADIUS := 14.0
 const WANDER_PAUSE_MIN := 0.5
 const WANDER_PAUSE_MAX := 2.5
 const REST_PAUSE_MIN := 3.0
 const REST_PAUSE_MAX := 6.0
 const EAT_PAUSE_MIN := 2.0
 const EAT_PAUSE_MAX := 4.0
-const BOB_AMPLITUDE := 2.5
+const BOB_AMPLITUDE := 5.0
 const BOB_SPEED := 3.0
 
 enum State { WANDER, RESTING, EATING }
@@ -23,7 +23,7 @@ var data: ResidentData
 
 var _home: Vector2
 var _target: Vector2
-var _speed := 40.0
+var _speed := 80.0
 var _pause := 0.0
 var _state: State = State.WANDER
 var _bob_time := 0.0
@@ -36,7 +36,7 @@ func _init(p_data: ResidentData, home: Vector2) -> void:
 	global_position = home
 	_target = home
 	z_index = 10
-	_speed = _rng.randf_range(25.0, 55.0)
+	_speed = _rng.randf_range(50.0, 110.0)
 
 
 func _process(delta: float) -> void:
@@ -67,7 +67,7 @@ func _begin_next_leg() -> void:
 	match _state:
 		State.WANDER:
 			_target = _home + Vector2.from_angle(_rng.randf() * TAU) \
-					* _rng.randf_range(8.0, WANDER_RADIUS)
+					* _rng.randf_range(16.0, WANDER_RADIUS)
 		State.RESTING:
 			_target = global_position
 		State.EATING:

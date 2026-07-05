@@ -2,7 +2,7 @@ class_name DecorationView
 extends Node2D
 ## Placeholder visual for one decoration: a rounded square in its content color.
 
-const SIZE := 22.0
+const SIZE := 44.0
 
 var _garden: Garden
 var _cell: Vector2i

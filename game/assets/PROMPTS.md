@@ -183,9 +183,12 @@ The sunflower and farmer are the reference implementation. For a new plant `foo`
    mound on the day it's planted, before any growth — no per-plant art for that state.
 4. **No code changes for plants.** `PlantView` renders `stage_textures` when present and
    falls back to placeholder circles when the array is empty — partially-arted content
-   always still runs. Sprites are bottom-anchored (base on the cell's bottom edge) and
-   Y-sorted so the player walks behind tall plants; the display box per category is the
-   `BOX_CELLS` constant in the view script.
+   always still runs. Sprites are Y-sorted and **baseline-anchored automatically**: the
+   game finds each texture's bottom-most visible pixel (`SpriteAnchor`) and plants THAT
+   on the ground point, so uneven empty canvas margins never make the plant float or the
+   ground point wander between stages. No manual alignment — the only rule is: nothing
+   visible below the true base (the contact shadow/soil mound IS the base). The display
+   box per category is the `BOX_CELLS` constant in the view script.
 5. **Verify.** Run the test suite, then F5: plant it, press N through every stage.
    Check that it sits on its cell, the sprout is smaller than the mature plant, and the
    farmer occludes/is occluded correctly walking around it.

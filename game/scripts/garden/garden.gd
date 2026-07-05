@@ -5,7 +5,9 @@ extends Node2D
 ## Placeholder rendering: terrain as colored cells via _draw(); swap for a
 ## TileMapLayer in the Phase 8 art pass.
 
-const CELL := 32
+## Ground cell size in world px. 64 = the art-spec scale (PROMPTS.md §3): big enough
+## on screen to appreciate the painted detail. All view sizes derive from this.
+const CELL := 64
 
 var model := GardenModel.new()
 
