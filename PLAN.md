@@ -117,14 +117,16 @@ Custom Resource classes (scripts in `scripts/data/`):
 class_name PlantData extends Resource
 @export var id: StringName
 @export var display_name: String
-@export var category: Category            # FLOWER, BUSH, TREE, GROUND_COVER, AQUATIC
-@export var footprint: Vector2i = Vector2i.ONE
+@export var category: Types.PlantCategory  # FLOWER, BUSH, TREE, GROUND_COVER, AQUATIC
+@export var allowed_terrain: Array[StringName]  # soil preference — dirt today; wildflowers
+                                          # on grass / aquatics on water are content edits
 @export var days_to_mature: int
-@export var growth_stage_textures: Array[Texture2D]   # seed → sprout → … → mature
-@export var bloom_seasons: Array[Season]
-@export var fruit: FruitData              # null if none (what it produces, value, interval)
-@export var sell_hint: String
+@export var growth_stages: int            # visual stages incl. mature (textures at art pass)
+@export var bloom_seasons: int            # season flags
+@export var fruit_item: StringName        # repeating harvest ("" = none), every fruit_interval_days
+@export var harvest_whole_item: StringName # one-shot: cut the whole mature plant for this item
 @export var unlock_level: int
+@export var seed_price: int               # plus xp_on_plant / xp_on_mature
 ```
 
 ```gdscript
