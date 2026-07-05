@@ -5,6 +5,13 @@ extends Resource
 @export var id: StringName
 @export var display_name: String
 @export var category: Types.PlantCategory = Types.PlantCategory.FLOWER
+## Grid cells this plant occupies (anchor = the clicked cell, which becomes the
+## top-left). A 2×2 oak blocks all four cells from the moment it is planted —
+## while still growing too, not just at maturity.
+@export var footprint: Vector2i = Vector2i.ONE
+## Aspect-fit display box in cells at the 64 px art scale (PROMPTS.md §3 table).
+## Scale it with the footprint — e.g. the 2×2 oak draws in a 2×3 box.
+@export var display_box_cells: Vector2 = Vector2(1.0, 1.5)
 ## In-game days from planting until fully grown.
 @export var days_to_mature := 3
 ## Number of visual growth stages, including the mature one.

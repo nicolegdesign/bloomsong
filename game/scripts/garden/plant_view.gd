@@ -9,10 +9,6 @@ extends Node2D
 ## generic texture for every plant, so new plants need no extra art for day 0.
 
 const PLANTED_TEXTURE := preload("res://assets/art/plants/planted_dirt.png")
-## Display box, in cells: plants render 1 cell wide, 1.5 cells tall (art spec ratio
-## 64×96), aspect-fit. Because all stages share one source canvas, a sprout is
-## automatically small within the same box.
-const BOX_CELLS := Vector2(1.0, 1.5)
 
 const MIN_RADIUS := 4.0
 const MAX_RADIUS := 13.0
@@ -37,7 +33,10 @@ func _draw() -> void:
 	var used_fruiting_texture := bool(pl.was_mature) and fruit_ready and data.fruiting_texture != null
 	var texture := data.fruiting_texture if used_fruiting_texture else _texture_for(pl, data)
 	if texture != null:
-		SpriteAnchor.draw_fitted(self, texture, BOX_CELLS * Garden.CELL)
+		# Per-plant display box (PlantData.display_box_cells) so multi-tile plants
+		# like the 2×2 oak draw proportionally larger. Same box for every stage —
+		# the shared source canvas keeps relative stage scale correct within it.
+		SpriteAnchor.draw_fitted(self, texture, data.display_box_cells * Garden.CELL)
 	else:
 		_draw_placeholder(pl, data)
 	# The dedicated fruiting texture already shows the fruit visually; the small

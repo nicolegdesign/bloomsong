@@ -1,14 +1,21 @@
-[gd_resource type="Resource" script_class="PlantData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PlantData" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/plant_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/plants/oak_tree_0.png" id="2_stage0"]
+[ext_resource type="Texture2D" path="res://assets/art/plants/oak_tree_1.png" id="3_stage1"]
+[ext_resource type="Texture2D" path="res://assets/art/plants/oak_tree_2.png" id="4_stage2"]
+[ext_resource type="Texture2D" path="res://assets/art/plants/oak_tree_3.png" id="5_stage3"]
 
 [resource]
 script = ExtResource("1_script")
 id = &"oak_tree"
 display_name = "Oak Tree"
 category = 2
+footprint = Vector2i(2, 2)
+display_box_cells = Vector2(2, 3)
 days_to_mature = 5
 growth_stages = 4
+stage_textures = [ExtResource("2_stage0"), ExtResource("3_stage1"), ExtResource("4_stage2"), ExtResource("5_stage3")]
 bloom_seasons = 1
 allowed_terrain = [&"dirt"]
 placeholder_color = Color(0.25, 0.45, 0.25, 1)

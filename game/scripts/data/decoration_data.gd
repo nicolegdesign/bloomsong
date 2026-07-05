@@ -4,6 +4,9 @@ extends Resource
 
 @export var id: StringName
 @export var display_name: String
+## Grid cells this decoration occupies (anchor = the clicked cell, top-left).
+## E.g. the fallen log is 2×1 — two cells wide.
+@export var footprint: Vector2i = Vector2i.ONE
 @export var placeholder_color: Color = Color.WHITE
 ## Idle sprite (PROMPTS.md §5.4). Empty = placeholder rendering.
 @export var texture: Texture2D

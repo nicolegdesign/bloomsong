@@ -94,14 +94,27 @@ func _apply(cell: Vector2i) -> void:
 		Mode.TERRAIN:
 			garden.set_terrain(item.id, cell)
 		Mode.PLANT:
-			# Explain a soil refusal instead of failing silently.
-			if garden.model.in_bounds(cell) and not garden.model.is_occupied(cell) \
-					and not garden.model.soil_ok(item.id, cell):
-				EventBus.toast.emit("%s needs %s." % [item.display_name, _soil_names(item)])
-				return
-			garden.place(GardenModel.KIND_PLANT, item.id, cell)
+			_place_with_feedback(GardenModel.KIND_PLANT, item, cell)
 		Mode.DECORATION:
-			garden.place(GardenModel.KIND_DECORATION, item.id, cell)
+			_place_with_feedback(GardenModel.KIND_DECORATION, item, cell)
+
+
+## Places via Garden, explaining refusals instead of failing silently. The clicked
+## cell becomes the footprint's top-left anchor for multi-tile items.
+func _place_with_feedback(kind: StringName, item: Resource, cell: Vector2i) -> void:
+	match garden.model.place_error(kind, item.id, cell):
+		"":
+			garden.place(kind, item.id, cell)
+		"soil":
+			if kind == GardenModel.KIND_PLANT:
+				EventBus.toast.emit("%s needs %s." % [item.display_name, _soil_names(item)])
+			else:
+				EventBus.toast.emit("%s can't sit on that ground." % item.display_name)
+		"occupied", "bounds":
+			var fp: Vector2i = garden.model.footprint_of(kind, item.id)
+			if fp != Vector2i.ONE:
+				EventBus.toast.emit("%s needs a clear %d×%d space." % [item.display_name, fp.x, fp.y])
+			# 1×1 on an occupied cell is self-evident — no toast noise.
 
 
 func _soil_names(plant: PlantData) -> String:

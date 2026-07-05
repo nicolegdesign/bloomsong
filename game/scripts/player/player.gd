@@ -6,8 +6,10 @@ extends Node2D
 
 const SPEED := 300.0  # world px/sec — scaled with Garden.CELL
 const FARMER_TEXTURE := preload("res://assets/art/player/farmer.png")
-## Display box in cells (art spec: character 64×96 at 64 px cells → 1 × 1.5).
-const BOX_CELLS := Vector2(1.0, 1.5)
+## Display box in cells. Generous on purpose: the farmer's source canvas is square
+## with margins, so the drawn character comes out ~1.4 cells tall — reading clearly
+## against 2-cell sunflowers and 3-cell oaks.
+const BOX_CELLS := Vector2(1.6, 2.4)
 
 var bounds := Rect2()
 

@@ -181,6 +181,12 @@ Empty until the style board session.)*
 - **Rabbit (idle), re-exported:** ✅ 2026-07-05 — same §5.5 template + style board, this time
   with a real alpha channel. Wired in `content/residents/rabbit.tres` with the default
   medium/bottom-anchored box (no `texture_centered`, unlike butterfly/snail).
+- **Terrain tiles (dirt, long grass, short grass, water):** ✅ 2026-07-05 — §5.1 template
+  (seamless, opaque, square-on, no transparency). First terrain art, so `TerrainData` gained a
+  `texture` field; `Garden._draw()` stretches it to fill each 64×64 cell exactly (no aspect-fit
+  or baseline anchoring needed — a tileable texture just fills its cell edge-to-edge). Falls
+  back to the flat `placeholder_color` rect when a terrain has no texture, same pattern as
+  every other content type.
 
 ## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 

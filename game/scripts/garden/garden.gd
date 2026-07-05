@@ -8,6 +8,10 @@ extends Node2D
 ## Ground cell size in world px. 64 = the art-spec scale (PROMPTS.md §3): big enough
 ## on screen to appreciate the painted detail. All view sizes derive from this.
 const CELL := 64
+## Where a sprite's base sits within its (bottom) cell, as a fraction of cell height.
+## Just below center — in 3/4 view an object stands ON its tile, so its ground
+## contact belongs near the tile's visual middle, not its bottom edge.
+const BASE_IN_CELL := 0.65
 
 var model := GardenModel.new()
 
@@ -90,29 +94,32 @@ func place(kind: StringName, id: StringName, cell: Vector2i) -> bool:
 
 ## Refunds the removed plant/decoration back to purchased stock — removing a
 ## mistake is never punished (PLAN.md §8: "removal refunds partially or fully").
+## Works from any covered cell of a multi-tile footprint (views are keyed by anchor).
 func remove(cell: Vector2i) -> bool:
-	var removed := model.remove(cell)
+	var anchor := model.anchor_at(cell)
+	var removed := model.remove(anchor)
 	if removed.is_empty():
 		return false
 	if removed.kind == GardenModel.KIND_PLANT:
 		PlayerData.add_seed(removed.id)
 	elif removed.kind == GardenModel.KIND_DECORATION:
 		PlayerData.add_decoration(removed.id)
-	_free_view(cell)
-	EventBus.placement_changed.emit(cell)
+	_free_view(anchor)
+	EventBus.placement_changed.emit(anchor)
 	return true
 
 
 ## Collects ripe fruit at cell into the inventory. Returns true if something was picked.
 func harvest(cell: Vector2i) -> bool:
-	var item_id := model.harvest(cell)
+	var anchor := model.anchor_at(cell)
+	var item_id := model.harvest(anchor)
 	if item_id == &"":
 		return false
 	PlayerData.add_item(item_id, 1)
 	var item := ContentDB.get_item(item_id)
 	if item != null:
 		EventBus.toast.emit("Harvested: %s" % item.display_name)
-	_refresh_view(cell)
+	_refresh_view(anchor)
 	return true
 
 
@@ -120,15 +127,16 @@ func harvest(cell: Vector2i) -> bool:
 ## removed and the item goes to inventory — no seed refund; this is the reward path,
 ## unlike remove(). Returns true if something was cut.
 func harvest_whole(cell: Vector2i) -> bool:
-	var item_id := model.harvest_whole(cell)
+	var anchor := model.anchor_at(cell)
+	var item_id := model.harvest_whole(anchor)
 	if item_id == &"":
 		return false
 	PlayerData.add_item(item_id, 1)
 	var item := ContentDB.get_item(item_id)
 	if item != null:
 		EventBus.toast.emit("Harvested: %s" % item.display_name)
-	_free_view(cell)
-	EventBus.placement_changed.emit(cell)
+	_free_view(anchor)
+	EventBus.placement_changed.emit(anchor)
 	return true
 
 
@@ -196,9 +204,12 @@ func _create_view(cell: Vector2i) -> void:
 		view = PlantView.new(self, cell)
 	else:
 		view = DecorationView.new(self, cell)
-	# Anchored at the cell's BOTTOM-center: sprites draw upward from their base,
+	# Ground point: horizontally centered on the footprint, vertically at
+	# BASE_IN_CELL of the footprint's bottom row. Sprites draw upward from here,
 	# and Y-sort uses this base position — the 3/4-view convention.
-	view.position = Vector2(cell) * CELL + Vector2(CELL / 2.0, CELL)
+	var fp := model.footprint_of(pl.kind, pl.id)
+	view.position = Vector2(cell) * CELL \
+			+ Vector2(fp.x * CELL / 2.0, (fp.y - 1 + BASE_IN_CELL) * CELL)
 	_placements_layer.add_child(view)
 	_views[cell] = view
 
@@ -224,8 +235,11 @@ func _draw() -> void:
 		for x in model.width:
 			var cell := Vector2i(x, y)
 			var t := ContentDB.get_terrain(model.get_terrain(cell))
-			var color := t.placeholder_color if t != null else Color.MAGENTA
-			draw_rect(Rect2(Vector2(cell) * CELL, Vector2.ONE * CELL), color)
+			var rect := Rect2(Vector2(cell) * CELL, Vector2.ONE * CELL)
+			if t != null and t.texture != null:
+				draw_texture_rect(t.texture, rect, false)
+			else:
+				draw_rect(rect, t.placeholder_color if t != null else Color.MAGENTA)
 	# Faint grid lines for placement readability.
 	var grid_color := Color(0, 0, 0, 0.06)
 	for x in model.width + 1:

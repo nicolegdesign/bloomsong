@@ -1,11 +1,13 @@
-[gd_resource type="Resource" script_class="TerrainData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="TerrainData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/terrain_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/terrain/dirt.png" id="2_tex"]
 
 [resource]
 script = ExtResource("1_script")
 id = &"dirt"
 display_name = "Dirt"
 placeholder_color = Color(0.607, 0.463, 0.325, 1)
+texture = ExtResource("2_tex")
 plantable = true
 unlock_level = 1

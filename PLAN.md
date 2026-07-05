@@ -118,6 +118,8 @@ class_name PlantData extends Resource
 @export var id: StringName
 @export var display_name: String
 @export var category: Types.PlantCategory  # FLOWER, BUSH, TREE, GROUND_COVER, AQUATIC
+@export var footprint: Vector2i           # cells occupied (2×2 oak); blocks them from planting day
+@export var display_box_cells: Vector2    # sprite display box, scaled with footprint
 @export var allowed_terrain: Array[StringName]  # soil preference — dirt today; wildflowers
                                           # on grass / aquatics on water are content edits
 @export var days_to_mature: int

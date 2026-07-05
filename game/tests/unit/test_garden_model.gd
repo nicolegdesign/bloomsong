@@ -79,6 +79,36 @@ func test_harvest_whole(t: Node) -> void:
 	t.check_eq(m.harvest_whole(cell), &"", "blackberry bush is not whole-harvestable")
 
 
+func test_multi_tile_footprint(t: Node) -> void:
+	var m := GardenModel.new(10, 8)
+	# The 2×2 oak needs its WHOLE footprint on dirt — 3 of 4 cells is not enough.
+	m.set_terrain(Vector2i(1, 1), &"dirt")
+	m.set_terrain(Vector2i(2, 1), &"dirt")
+	m.set_terrain(Vector2i(1, 2), &"dirt")
+	t.check_eq(m.place_error(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(1, 1)), "soil",
+			"oak refused with only 3 of 4 dirt cells")
+	m.set_terrain(Vector2i(2, 2), &"dirt")
+	t.check(m.place(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(1, 1), 1), "oak placed on 2×2 dirt")
+	# Blocks all four cells immediately — while still growing, not just at maturity.
+	t.check(m.is_occupied(Vector2i(2, 2)), "corner cell blocked the moment it's planted")
+	t.check_eq(m.get_placement(Vector2i(2, 1)).get("id"), &"oak_tree",
+			"any covered cell resolves to the placement")
+	m.set_terrain(Vector2i(5, 2), &"dirt")
+	t.check(m.place_error(GardenModel.KIND_PLANT, &"sunflower", Vector2i(2, 2)) == "occupied",
+			"nothing can be planted inside the footprint")
+	t.check(not m.set_terrain(Vector2i(2, 2), &"long_grass"), "terrain locked under the whole footprint")
+	t.check_eq(m.place_error(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(9, 7)), "bounds",
+			"footprint may not hang off the garden edge")
+	# Removing via a NON-anchor covered cell frees the entire footprint.
+	t.check_eq(m.remove(Vector2i(2, 2)).get("id"), &"oak_tree", "remove works from any covered cell")
+	for cell in [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2), Vector2i(2, 2)]:
+		t.check(not m.is_occupied(cell), "cell %s freed after remove" % cell)
+	# The 2×1 log: horizontal decoration footprint.
+	t.check(m.place(GardenModel.KIND_DECORATION, &"log", Vector2i(4, 4), 1), "log placed on grass")
+	t.check(m.is_occupied(Vector2i(5, 4)), "log blocks its second cell")
+	t.check(not m.is_occupied(Vector2i(6, 4)), "log doesn't block beyond its footprint")
+
+
 func test_growth_to_maturity(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
 	var cell := Vector2i(2, 2)
@@ -118,8 +148,9 @@ func test_fruit_cycle(t: Node) -> void:
 
 func test_category_queries(t: Node) -> void:
 	var m := GardenModel.new(10, 8)
-	for x in 3:
-		m.set_terrain(Vector2i(x, 0), &"dirt")
+	for x in 4:  # oak is 2×2 — its whole footprint needs dirt
+		for y in 2:
+			m.set_terrain(Vector2i(x, y), &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(0, 0), 1)
 	m.place(GardenModel.KIND_PLANT, &"sunflower", Vector2i(1, 0), 1)
 	m.place(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(2, 0), 1)
@@ -151,6 +182,7 @@ func test_serialize_round_trip(t: Node) -> void:
 	t.check_eq(m2.width, 10, "width restored")
 	t.check_eq(m2.count_terrain(&"water"), 1, "terrain restored")
 	t.check_eq(m2.count_terrain(&"short_grass"), 77, "default terrain restored")
+	t.check(m2.is_occupied(Vector2i(6, 5)), "multi-tile occupancy (2×1 log) rebuilt on load")
 	t.check(m2.is_mature(Vector2i(4, 4)), "growth state restored")
 	t.check_eq(int(m2.get_placement(Vector2i(4, 4)).days_grown), 4, "days_grown restored")
 	t.check_eq(m2.count_decoration(&"log"), 1, "decoration restored")

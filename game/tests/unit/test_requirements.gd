@@ -33,7 +33,9 @@ func test_require_specific_plant(t: Node) -> void:
 	r.plant_id = &"oak_tree"
 	var m := GardenModel.new(10, 8)
 	t.check(not r.is_met(_ctx(m)), "empty garden fails")
-	m.set_terrain(Vector2i(0, 0), &"dirt")
+	for x in 2:  # oak is 2×2 — dirt under the whole footprint
+		for y in 2:
+			m.set_terrain(Vector2i(x, y), &"dirt")
 	m.place(GardenModel.KIND_PLANT, &"oak_tree", Vector2i(0, 0), 1)
 	t.check(not r.is_met(_ctx(m)), "sapling doesn't count (mature_only)")
 	for i in 5:

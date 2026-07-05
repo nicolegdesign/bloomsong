@@ -6,6 +6,9 @@ extends RefCounted
 const KIND_PLANT := &"plant"
 const KIND_DECORATION := &"decoration"
 
+## Returned by anchor_at() for cells with nothing on them.
+const NO_ANCHOR := Vector2i(-9999, -9999)
+
 var width: int
 var height: int
 var default_terrain: StringName
@@ -13,7 +16,11 @@ var default_terrain: StringName
 var terrain: Dictionary = {}
 ## anchor cell (Vector2i) -> placement Dictionary:
 ## { id, kind, planted_day, days_grown, fruit_days, fruit_ready, was_mature }
+## The anchor is the top-left cell of the placement's footprint.
 var placements: Dictionary = {}
+## covered cell (Vector2i) -> anchor cell. Multi-tile footprints (a 2×2 oak, a 2×1
+## log) block every covered cell from the moment they're placed — growing included.
+var occupancy: Dictionary = {}
 
 
 func _init(w: int = 20, h: int = 15, p_default_terrain: StringName = &"short_grass") -> void:
@@ -38,7 +45,7 @@ func get_terrain(cell: Vector2i) -> StringName:
 func set_terrain(cell: Vector2i, id: StringName) -> bool:
 	if not in_bounds(cell) or ContentDB.get_terrain(id) == null:
 		return false
-	if placements.has(cell):
+	if occupancy.has(cell):
 		return false  # clear the placement first; terrain under objects is locked
 	if terrain[cell] == id:
 		return false
@@ -49,38 +56,95 @@ func set_terrain(cell: Vector2i, id: StringName) -> bool:
 # --- Placement --------------------------------------------------------------
 
 func is_occupied(cell: Vector2i) -> bool:
-	return placements.has(cell)
+	return occupancy.has(cell)
 
 
-func place(kind: StringName, id: StringName, cell: Vector2i, day: int) -> bool:
-	if not in_bounds(cell) or placements.has(cell):
-		return false
+## Anchor of the placement covering this cell, or NO_ANCHOR. Any covered cell of a
+## multi-tile placement resolves to its anchor (click a tree's corner = the tree).
+func anchor_at(cell: Vector2i) -> Vector2i:
+	return occupancy.get(cell, NO_ANCHOR)
+
+
+## Footprint of a content id, in cells (1×1 for anything without one).
+func footprint_of(kind: StringName, id: StringName) -> Vector2i:
+	var data: Resource = ContentDB.get_plant(id) if kind == KIND_PLANT \
+			else ContentDB.get_decoration(id)
+	if data == null or data.footprint.x < 1 or data.footprint.y < 1:
+		return Vector2i.ONE
+	return data.footprint
+
+
+func footprint_cells(anchor: Vector2i, footprint: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for dy in footprint.y:
+		for dx in footprint.x:
+			cells.append(anchor + Vector2i(dx, dy))
+	return cells
+
+
+## Why placing would fail at this anchor: "" = it would succeed. One source of
+## truth for both place() and the UI's refusal messages.
+## Reasons: "unknown", "bounds", "occupied", "soil".
+func place_error(kind: StringName, id: StringName, anchor: Vector2i) -> String:
+	if kind == KIND_PLANT and ContentDB.get_plant(id) == null:
+		return "unknown"
+	if kind == KIND_DECORATION and ContentDB.get_decoration(id) == null:
+		return "unknown"
+	var cells := footprint_cells(anchor, footprint_of(kind, id))
+	for cell in cells:
+		if not in_bounds(cell):
+			return "bounds"
+	for cell in cells:
+		if occupancy.has(cell):
+			return "occupied"
 	if kind == KIND_PLANT:
 		# Plants follow their own soil preference (PlantData.allowed_terrain), which
 		# may include terrain that blocks decorations — e.g. aquatics on water.
-		if ContentDB.get_plant(id) == null or not soil_ok(id, cell):
-			return false
-	elif kind == KIND_DECORATION:
-		var t: TerrainData = ContentDB.get_terrain(get_terrain(cell))
-		if t == null or not t.plantable or ContentDB.get_decoration(id) == null:
-			return false
-	placements[cell] = {
+		if not soil_ok(id, anchor):
+			return "soil"
+	else:
+		for cell in cells:
+			var t: TerrainData = ContentDB.get_terrain(get_terrain(cell))
+			if t == null or not t.plantable:
+				return "soil"
+	return ""
+
+
+func place(kind: StringName, id: StringName, anchor: Vector2i, day: int) -> bool:
+	if place_error(kind, id, anchor) != "":
+		return false
+	placements[anchor] = {
 		"id": id, "kind": kind, "planted_day": day,
 		"days_grown": 0, "fruit_days": 0, "fruit_ready": false, "was_mature": false,
 	}
+	for cell in footprint_cells(anchor, footprint_of(kind, id)):
+		occupancy[cell] = anchor
 	return true
 
 
+## Removes the placement covering this cell (any covered cell works). Returns the
+## removed placement Dictionary, or {} if the cell was empty.
 func remove(cell: Vector2i) -> Dictionary:
-	if not placements.has(cell):
+	var anchor := anchor_at(cell)
+	if anchor == NO_ANCHOR:
 		return {}
-	var removed: Dictionary = placements[cell]
-	placements.erase(cell)
+	var removed: Dictionary = placements[anchor]
+	placements.erase(anchor)
+	_clear_occupancy(anchor)
 	return removed
 
 
+## Placement covering this cell (any covered cell of a footprint), or {}.
 func get_placement(cell: Vector2i) -> Dictionary:
-	return placements.get(cell, {})
+	return placements.get(anchor_at(cell), {})
+
+
+func _clear_occupancy(anchor: Vector2i) -> void:
+	# By reverse lookup rather than recomputing the footprint, so a placement is
+	# fully cleared even if its content data's footprint changed since placing.
+	for cell: Vector2i in occupancy.keys():
+		if occupancy[cell] == anchor:
+			occupancy.erase(cell)
 
 
 # --- Growth (driven by Garden on day_passed) --------------------------------
@@ -142,23 +206,32 @@ func harvest(cell: Vector2i) -> StringName:
 	return data.fruit_item
 
 
-## Soil preference check only — placement additionally needs the cell in bounds
+## Soil preference check only — placement additionally needs the cells in bounds
 ## and unoccupied. Kept separate so the UI can explain a refusal ("needs Dirt").
-func soil_ok(plant_id: StringName, cell: Vector2i) -> bool:
+## Checks the plant's WHOLE footprint from this anchor (a 2×2 oak needs 4 dirt cells).
+func soil_ok(plant_id: StringName, anchor: Vector2i) -> bool:
 	var data: PlantData = ContentDB.get_plant(plant_id)
-	return data != null and get_terrain(cell) in data.allowed_terrain
+	if data == null:
+		return false
+	for cell in footprint_cells(anchor, footprint_of(KIND_PLANT, plant_id)):
+		if not get_terrain(cell) in data.allowed_terrain:
+			return false
+	return true
 
 
 ## One-shot whole-plant harvest (e.g. cutting a mature sunflower): removes the
 ## plant and returns its harvest_whole_item ("" if not mature/harvestable).
+## Any covered cell of the footprint works.
 func harvest_whole(cell: Vector2i) -> StringName:
-	var pl := get_placement(cell)
+	var anchor := anchor_at(cell)
+	var pl := placements.get(anchor, {}) as Dictionary
 	if pl.is_empty() or pl.kind != KIND_PLANT or not bool(pl.was_mature):
 		return &""
 	var data: PlantData = ContentDB.get_plant(pl.id)
 	if data == null or data.harvest_whole_item == &"":
 		return &""
-	placements.erase(cell)
+	placements.erase(anchor)
+	_clear_occupancy(anchor)
 	return data.harvest_whole_item
 
 
@@ -261,4 +334,10 @@ static func deserialize(d: Dictionary) -> GardenModel:
 			"fruit_ready": bool(p.get("fruit_ready", false)),
 			"was_mature": bool(p.get("was_mature", false)),
 		}
+	# Occupancy is derived, not saved: rebuild from footprints so saves stay small
+	# and content-data footprint changes apply to existing gardens on load.
+	for anchor: Vector2i in m.placements:
+		var pl: Dictionary = m.placements[anchor]
+		for cell in m.footprint_cells(anchor, m.footprint_of(pl.kind, pl.id)):
+			m.occupancy[cell] = anchor
 	return m
