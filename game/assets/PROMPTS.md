@@ -206,6 +206,48 @@ Empty until the style board session.)*
   of the usual 192. Wired in `scripts/ui/shop_ui.gd` behind a lighter dim overlay (0.35 alpha,
   down from the old plain-black 0.55 — the scene reads fine on its own) via
   `STRETCH_KEEP_ASPECT_COVERED` so it fills the screen without distorting.
+- **Diary rework (book background + handwritten font):** ✅ 2026-07-05 — `diary_open.png` is a
+  UI screen background (§3, downscaled to 1024 max) wired into `scripts/ui/diary_ui.gd`. The
+  book's safe-to-write-on page area isn't eyeballed — it was measured by sampling the art for
+  paper-colored pixels (cream/tan, excluding the green cover and brown page-edge shading),
+  giving `LEFT_PAGE`/`RIGHT_PAGE` as fractional rects mapped onto Control anchors, so text/art
+  always sits inside the painted page regardless of how big the book is ever displayed. Each
+  entry's own resident/plant texture is now shown large on the left page (tinted near-black as
+  a silhouette until discovered) instead of the old small icon grid, which moved to a slim
+  strip below the book. Body text switched from plain white to a warm ink-brown
+  (`INK_COLOR`) and to **Patrick Hand**, a handwriting-style font — not AI-generated art, so
+  logged differently: downloaded from Google Fonts
+  (`github.com/google/fonts/ofl/patrickhand`), SIL Open Font License (free to embed/ship),
+  license copy kept at `assets/fonts/PatrickHand-OFL.txt`. It has no bold weight, so `[b]` tags
+  use a `FontVariation` with `variation_embolden` for a synthetic bold instead.
+- **Diary rework #2 (tabbed book + page-flip nav):** ✅ 2026-07-05 — superseded `diary_open.png`
+  with 4 UI screen backgrounds (`diary_residents/plants/flowers/achievements.png`), each the
+  same book art with one of 4 painted tab icons (paw/seedling/flower/star) along the left edge
+  shown "pressed in" — swapping the whole background image per tab, rather than a separate
+  overlay, since the active-tab highlight is baked into the art. Invisible button hotspots sit
+  over the 4 tab icons at a measured, fixed position (identical across all 4 images). Residents
+  = paw; Plants = seedling, filtered to non-flower categories (trees/bushes); Flowers = flower,
+  filtered to the flower category; Achievements = star, a "coming soon" placeholder page (no
+  backing system yet). The old bottom icon-grid strip is gone — small ◀/▶ placeholder-text
+  arrows in the pages' outer top corners now cycle entries within a tab (wrapping at either
+  end, matching the game's no-dead-ends design guardrail). Right-page text is now centered
+  (both the block as a whole, via `fit_content` + a centered VBox, and each line via bbcode
+  `[center]`) and widened, with `scroll_active` off — no scrollbar. Removed the header/footer
+  rows entirely so the book is the only thing being centered on screen.
+- **Resident/plant sprite resolution bump (diary blur fix):** ✅ 2026-07-05 — the diary's left
+  page shows each entry's existing `texture`/`stage_textures` sprite large (§3's "Diary
+  illustration" row still describes a dedicated, separate 512×512 `assets/art/diary/` vignette
+  portrait — that never got made), and those sprites were only ever downscaled to the old
+  192 px garden convention, so blowing them up to fill the page looked blurry. Re-ran
+  `sips -Z 512` from the existing `_source/` originals (all ≥543 px, so this is a real
+  downscale everywhere, never an upscale) for every resident and plant/growth-stage PNG.
+  Confirmed safe for the garden view too: `SpriteAnchor.draw_fitted()` aspect-fits into each
+  content's fixed `display_box_cells * Garden.CELL` box every draw call, recomputing the scale
+  from the texture's current pixel size — so on-screen size in the garden is unchanged, only
+  sampling quality improves. This is a stopgap, not the originally-planned dedicated diary
+  portrait art — that would still need new AI-generated vignette portraits per entry plus a
+  data-model field to hold them, which is a separate future task if the shared-sprite look
+  isn't good enough once seen in-editor.
 
 ## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 
