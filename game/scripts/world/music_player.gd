@@ -46,11 +46,11 @@ func _ready() -> void:
 	_is_night = Clock.time_of_day() == Types.TimeOfDay.NIGHT
 	_music.stream = NIGHT_MUSIC if _is_night else DAY_MUSIC
 	_ambience.stream = NIGHT_AMBIENCE if _is_night else DAY_AMBIENCE
-	_music.play()
-	_ambience.play()
+	_play(_music)
+	_play(_ambience)
 	if Clock.weather == Types.Weather.RAIN:
 		_rain.stream = RAIN_AMBIENCE
-		_rain.play()
+		_play(_rain)
 
 	EventBus.toggle_mute.connect(toggle_mute)
 	EventBus.time_of_day_changed.connect(_on_time_of_day_changed)
@@ -93,10 +93,10 @@ func _on_game_loaded() -> void:
 	_is_night = Clock.time_of_day() == Types.TimeOfDay.NIGHT
 	_music.volume_db = MUSIC_VOLUME_DB
 	_music.stream = NIGHT_MUSIC if _is_night else DAY_MUSIC
-	_music.play()
+	_play(_music)
 	_ambience.volume_db = AMBIENCE_VOLUME_DB
 	_ambience.stream = NIGHT_AMBIENCE if _is_night else DAY_AMBIENCE
-	_ambience.play()
+	_play(_ambience)
 	_set_rain(Clock.weather == Types.Weather.RAIN)
 
 
@@ -107,7 +107,7 @@ func _crossfade(player: AudioStreamPlayer, new_stream: AudioStream, target_db: f
 	tween.tween_property(player, "volume_db", target_db + SILENT_OFFSET_DB, FADE_SECONDS)
 	tween.tween_callback(func() -> void:
 		player.stream = new_stream
-		player.play())
+		_play(player))
 	tween.tween_property(player, "volume_db", target_db, FADE_SECONDS)
 
 
@@ -117,7 +117,7 @@ func _set_rain(active: bool) -> void:
 		if not _rain.playing:
 			_rain.stream = RAIN_AMBIENCE
 			_rain.volume_db = RAIN_VOLUME_DB + SILENT_OFFSET_DB
-			_rain.play()
+			_play(_rain)
 		tween.tween_property(_rain, "volume_db", RAIN_VOLUME_DB, FADE_SECONDS)
 	else:
 		tween.tween_property(_rain, "volume_db", RAIN_VOLUME_DB + SILENT_OFFSET_DB, FADE_SECONDS)
@@ -126,7 +126,16 @@ func _set_rain(active: bool) -> void:
 
 func _play_chime() -> void:
 	_sfx.stream = CHIME
-	_sfx.play()
+	_play(_sfx)
+
+
+## Godot quirk: AudioStreamPlayer.play() always resets stream_paused to false,
+## even if it was true — so every call site must go through here instead of
+## calling .play() directly, or a crossfade/rain-start/game-load silently
+## un-mutes itself the instant it plays a new stream.
+func _play(player: AudioStreamPlayer, from_position := 0.0) -> void:
+	player.play(from_position)
+	player.stream_paused = muted
 
 
 func _exit_tree() -> void:

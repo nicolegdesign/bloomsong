@@ -58,11 +58,14 @@ the display boxes the game fits sprites into (at the 64 px-cell art scale):
 | Resident (large: fox, turtle) | 96×80 | Feet at bottom-center |
 | Item icon (berry, feather, honey) | 64×64 | Centered, reads at small size |
 | Diary illustration | 512×512 | Framed vignette portrait — the one place a soft painted background IS wanted |
+| UI screen background (shop, diary) | 1280×720 (viewport width, not the 64 px cell scale) | A full illustrated scene — background IS wanted here too. Opaque, no transparency. Downscale to 1280 max-dimension, not the usual 192 — it fills most of the screen, so it needs real resolution. Fit with `STRETCH_KEEP_ASPECT_COVERED` (crops overflow, never distorts) behind a dim overlay for panel legibility |
 
 **File naming = content id** (they must match — saves reference ids forever):
 `assets/art/plants/sunflower_0.png … sunflower_2.png` (one per growth stage, count from the
 `.tres`), `assets/art/residents/robin.png`, `assets/art/terrain/short_grass.png`,
-`assets/art/items/berry.png`, `assets/art/diary/robin.png`.
+`assets/art/items/berry.png`, `assets/art/diary/robin.png`. UI backgrounds aren't tied to a
+content id (they're not game content, just a screen's backdrop) — name them for the screen:
+`assets/art/ui/shop_background.png`.
 
 ## 4. Which AI to use
 
@@ -198,6 +201,11 @@ Empty until the style board session.)*
   `icon_max_width` theme override, since Godot doesn't auto-scale it) handles the palette;
   the shop uses a small shared `_make_icon()` helper building a TextureRect or a
   placeholder-color ColorRect fallback.
+- **Shop background:** ✅ 2026-07-05 — new §3 category (UI screen background), first of its
+  kind: a full painted scene rather than a transparent object, downscaled to 1280 max instead
+  of the usual 192. Wired in `scripts/ui/shop_ui.gd` behind a lighter dim overlay (0.35 alpha,
+  down from the old plain-black 0.55 — the scene reads fine on its own) via
+  `STRETCH_KEEP_ASPECT_COVERED` so it fills the screen without distorting.
 
 ## 7. Adding art to the game — the worked pipeline (follow this for every asset)
 

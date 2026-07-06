@@ -14,6 +14,8 @@ const ICON_SIZE := 28.0
 ## Every plant shows this generic packet in the shop, not its own grown-plant art —
 ## you're buying a seed, not the finished flower (PROMPTS.md's icon convention).
 const SEED_ICON := preload("res://assets/art/icons/seed.png")
+## The shop storefront scene, filling the screen behind the buy/sell panel.
+const BACKGROUND := preload("res://assets/art/ui/shop_background.png")
 
 var _tab: Tab = Tab.BUY
 var _root := Control.new()
@@ -29,8 +31,17 @@ func _ready() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_root)
 
+	var background := TextureRect.new()
+	background.texture = BACKGROUND
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_root.add_child(background)
+
+	# A lighter dim than a plain black overlay would need — the storefront scene
+	# already reads fine; this just keeps the panel itself easy to read on top of it.
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.55)
+	dim.color = Color(0, 0, 0, 0.35)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(dim)
 
